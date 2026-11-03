@@ -35,7 +35,8 @@ button{font:inherit;color:inherit}
 
 /* header: wordmark · chapters · count */
 .top{display:flex;align-items:center;gap:40px}
-.wm{font-weight:600;font-size:34px;letter-spacing:-.02em;color:var(--maroon);line-height:1}
+.wm{color:var(--maroon);line-height:0;flex:none}
+.wm svg{display:block;height:30px;width:auto}
 .tabs{flex:1;display:flex;gap:12px;justify-content:center}
 .tab{width:126px;padding-top:14px;border-top:2px solid var(--line2);font-size:13px;color:var(--mut);white-space:nowrap}
 .tab small{font-size:11px;margin-right:6px;color:var(--faint)}
@@ -144,7 +145,7 @@ button{font:inherit;color:inherit}
 @media (max-width:1280px){.tab{width:auto;flex:1}.opts.c4{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:960px){
   .shell{margin:0;border-radius:0;padding:18px 16px 20px}
-  .top{gap:16px}.wm{font-size:26px}.tabs{display:none}
+  .top{gap:16px}.wm svg{height:24px}.tabs{display:none}
   .split{grid-template-columns:minmax(0,1fr);gap:40px}
 }
 @media (max-width:560px){.opts.c3{grid-template-columns:1fr}.p-side{display:none}.chap span{display:none}.go{padding-left:28px;gap:20px}}
@@ -153,7 +154,7 @@ button{font:inherit;color:inherit}
 <body>
 <div class="shell">
   <header class="top">
-    <div class="wm">WealthIQ</div>
+    <div class="wm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="944.32 477.67 680.51 124.66" fill="currentColor" role="img" aria-label="WealthIQ"><path transform="matrix(1,0,0,-1,964.0862,478.17219)" d="M0 0 31.629-76.714 63.979 0 95.25-76.714 127.954 0H147.724L94.171-124.158 62.9-47.598 31.271-124.158-19.766 0Z"/><path transform="matrix(1,0,0,-1,1150.1151,551.7107)" d="M0 0C-.721 4.132-2.696 7.728-5.392 10.243-7.73 12.4-11.502 14.556-17.252 14.556-23.365 14.556-27.316 12.041-29.654 9.704-32.171 7.368-34.146 3.773-35.046 0ZM17.432-30.731C14.198-36.482 9.522-41.514 4.672-44.568-1.438-48.523-9.526-50.319-17.614-50.319-27.675-50.319-35.942-47.804-43.131-40.616-50.319-33.427-54.274-23.003-54.274-11.683-54.274 0-50.14 11.32-42.234 19.409-35.942 25.697-27.675 29.652-16.894 29.652-4.854 29.652 2.875 24.441 7.368 19.767 17.073 9.704 17.969-4.313 17.969-12.22V-14.377H-36.301C-35.942-19.769-33.608-25.878-29.833-29.652-25.699-33.786-20.669-34.505-16.356-34.505-11.502-34.505-7.909-33.427-4.313-30.731-1.258-28.395 1.079-25.339 2.696-22.463Z"/><path transform="matrix(1,0,0,-1,1200.4342,562.1348)" d="M0 0C0-13.118 8.268-24.08 21.028-24.08 32.171-24.08 42.414-15.994 42.414-.179 42.414 16.354 32.171 24.261 21.028 24.261 8.268 24.261 0 13.479 0 0M41.334 38.099H58.949V-40.196H41.334V-29.652C33.608-38.638 24.082-39.895 18.693-39.895-4.672-39.895-17.969-20.486-17.969 .36-17.969 24.98-1.076 40.076 18.873 40.076 24.444 40.076 34.146 38.638 41.334 29.293Z"/><path transform="matrix(1,0,0,-1,0,1080)" d="M1297.346 477.67H1279.735V601.828H1297.346Z"/><path transform="matrix(1,0,0,-1,1342.0105,540.2092)" d="M0 0V-62.121H-17.611V0H-28.578V16.173H-17.611V62.037H0V16.173H9.881V0Z"/><path transform="matrix(1,0,0,-1,1373.2532,478.17219)" d="M0 0H17.611V-52.333C25.158-44.605 33.425-43.887 37.918-43.887 51.757-43.887 58.045-51.075 60.204-54.13 64.875-60.96 65.055-69.765 65.055-75.157V-124.158H47.444V-76.774C47.444-72.282 47.444-67.429 44.027-63.656 42.052-61.497 38.638-59.701 34.142-59.701 28.212-59.701 23.541-62.576 21.207-65.991 18.69-69.586 17.611-75.336 17.611-85.04V-124.158H0Z"/><path transform="matrix(1,0,0,-1,0,1080)" d="M1476.939 477.67H1458.6079V601.828H1476.939Z"/><path transform="matrix(1,0,0,-1,1593.0269,570.4007)" d="M0 0C5.751 6.649 10.602 15.454 10.602 30.55 10.602 57.147-7.73 75.837-33.429 75.837-59.125 75.837-77.456 57.147-77.456 30.55-77.456 3.953-59.125-14.737-33.429-14.737-24.441-14.737-17.973-12.76-12.76-10.064L-41.155 18.15H-18.331ZM.179-22.645C-9.167-28.575-19.59-31.629-33.429-31.629-69.371-31.629-95.787-5.032-95.787 30.55-95.787 65.773-69.371 92.731-33.429 92.731 2.334 92.731 28.933 65.773 28.933 30.55 28.933 8.626 19.228-5.032 12.398-12.4L31.808-31.629H9.164Z"/></svg></div>
     <nav class="tabs" aria-label="ASPIRE chapters">
       <div class="tab done"><small>01</small>Arc</div>
       <div class="tab done"><small>02</small>Source</div>
