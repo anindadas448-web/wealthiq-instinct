@@ -22,7 +22,8 @@
   --shadow:0 2px 6px rgba(49,37,29,.04),0 40px 100px -50px rgba(49,37,29,.35);
   /* chart */
   --line:#5E1630; --grid:rgba(46,35,27,.06); --axis:rgba(46,35,27,.42);
-  --held:#B98A46; --beyond:#8C2A42; --area:#C9A04A;
+  --held:#B98A46; --beyond:#C9403A; --area:#C9A04A;
+  --z1:#E6D3A8; --z2:#D2AD68; --z3:#A87838; --z4:#6B1A33;
   --soft:cubic-bezier(.22,1,.36,1); --snap:cubic-bezier(.32,.72,0,1);
   --f:"Outfit","Helvetica Neue",Arial,sans-serif;
   color-scheme:light;
@@ -38,7 +39,8 @@
   --vis:radial-gradient(circle,rgba(255,255,255,.07) 1px,transparent 1.4px) 0 0/22px 22px,#110E0C;
   --shadow:0 40px 100px -40px rgba(0,0,0,.9);
   --line:#E6C68A; --grid:rgba(255,255,255,.06); --axis:rgba(245,238,227,.42);
-  --held:#E6C68A; --beyond:#D9798F; --area:#E6C68A;
+  --held:#E6C68A; --beyond:#F0716A; --area:#E6C68A;
+  --z1:#EFE0BD; --z2:#DDBB7C; --z3:#C08A4B; --z4:#B9536F;
   color-scheme:dark;
 }
 
@@ -112,11 +114,13 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .seg button{position:relative;height:64px;padding:0 12px;border-radius:16px;display:flex;align-items:center;gap:11px;text-align:left;color:var(--ink-2);background:var(--panel);
   box-shadow:0 0 0 1px var(--hair),0 1px 2px rgba(49,37,29,.06);transition:color .35s,box-shadow .35s,background .35s,transform .3s var(--soft)}
 /* each icon in a coin: a soft tint at rest, the gold coin when chosen */
-.seg .coin{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--gold-d);background:rgba(201,160,74,.12);box-shadow:inset 0 0 0 1px rgba(201,160,74,.22);transition:background .45s var(--soft),box-shadow .45s var(--soft),color .45s,transform .6s var(--snap)}
+.seg [data-k="steady"]{--zc:var(--z1)}.seg [data-k="measured"]{--zc:var(--z2)}.seg [data-k="bold"]{--zc:var(--z3)}.seg [data-k="fearless"]{--zc:var(--z4)}
+.seg .coin{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:color-mix(in srgb,var(--zc) 70%,var(--ink));background:color-mix(in srgb,var(--zc) 22%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--zc) 45%,transparent);transition:background .45s var(--soft),box-shadow .45s var(--soft),color .45s,transform .6s var(--snap)}
 .seg button .hi{width:18px;height:18px}
-[data-theme="dark"] .seg .coin{color:#C9A46A;background:rgba(230,198,138,.08);box-shadow:inset 0 0 0 1px rgba(230,198,138,.18)}
-.seg button:hover:not(.on) .coin{background:rgba(201,160,74,.18)}
-.seg button.on .coin{color:#3A2410;background:radial-gradient(120% 120% at 30% 15%,#FBEFCF,#E5C88E 42%,#BC9150 78%,#9E7438);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(150,108,48,.3),0 6px 12px -6px rgba(150,104,40,.6);transform:scale(1.04)}
+[data-theme="dark"] .seg .coin{color:var(--zc);background:color-mix(in srgb,var(--zc) 14%,transparent)}
+.seg button:hover:not(.on) .coin{background:color-mix(in srgb,var(--zc) 32%,transparent)}
+.seg button.on .coin{color:#fff;background:radial-gradient(120% 120% at 30% 15%,color-mix(in srgb,var(--zc) 45%,#fff),var(--zc) 55%,color-mix(in srgb,var(--zc) 75%,#000));box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 0 0 1px color-mix(in srgb,var(--zc) 60%,transparent),0 6px 12px -6px color-mix(in srgb,var(--zc) 80%,transparent);transform:scale(1.04)}
+.seg [data-k="steady"].on .coin,.seg [data-k="measured"].on .coin{color:#3A2410}
 .seg button span{display:flex;flex-direction:column;gap:3px;min-width:0}
 .seg button b{font-weight:400;font-size:14px;color:inherit;white-space:nowrap}
 .seg button small{font-size:11.5px;color:var(--mut);white-space:nowrap;transition:color .35s}
@@ -417,6 +421,8 @@ function drawPrice(anim) {
   h += gps(x(TN), y(VN), anim);
   /* fall-from-peak pane */
   h += `<text x="${P.l}" y="${ddT - 16}" class="cap-t">FALL FROM PEAK</text>`;
+  { const L = LINES.find(l => l.k === sel); [[0, 10], [10, 20], [20, 35], [35, 70]].forEach(([a1, b1], i) => { const pick = L && L.k === LINES[i].k;
+    h += `<rect x="${P.l}" y="${dy(-a1 / 100)}" width="${W - P.l - P.r + 10}" height="${dy(-b1 / 100) - dy(-a1 / 100)}" style="fill:var(--z${i + 1})" opacity="${(pick ? .1 + .16 * mixK : .07).toFixed(3)}"/>`; }); }
   [0, -.3, -.6].forEach(p => h += `<line x1="${P.l}" x2="${W - P.r + 10}" y1="${dy(p)}" y2="${dy(p)}" style="stroke:var(--grid)"/><text x="${W - 24}" y="${dy(p) + 3.5}" text-anchor="end" class="ax">${p ? "−" + Math.abs(p * 100) + "%" : "0%"}</text>`);
   const dd = `M${x(T0)} ${dy(0)}` + D.map(([t], i) => "L" + x(t).toFixed(1) + " " + dy(DD[i]).toFixed(1)).join("") + `L${x(TN)} ${dy(0)}Z`;
   h += `<g class="${anim ? "drop" : ""}"><path d="${dd}" style="fill:var(--ink)" opacity="${(.1 * (1 - mixK)).toFixed(3)}"/>`;
@@ -456,12 +462,14 @@ function drawFalls(anim) {
   let h = `<defs>
     <linearGradient id="kH" x1="0" x2="1"><stop offset="0" stop-color="#EBCB8E"/><stop offset=".5" stop-color="#C9A25E"/><stop offset="1" stop-color="#957033"/></linearGradient>
     <linearGradient id="kB" x1="0" x2="1"><stop offset="0" stop-color="#9B3A57"/><stop offset=".5" stop-color="#6A1533"/><stop offset="1" stop-color="#3D0016"/></linearGradient>
-    <filter id="kg" x="-100%" y="-20%" width="300%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="2.4" flood-color="#8C2A42" flood-opacity=".35"/></filter></defs>`;
+    <linearGradient id="kR" x1="0" x2="1"><stop offset="0" stop-color="#EE7A70"/><stop offset=".5" stop-color="#D2463D"/><stop offset="1" stop-color="#A82A23"/></linearGradient>
+    <filter id="kg" x="-100%" y="-20%" width="300%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="2.4" flood-color="#D2463D" flood-opacity=".35"/></filter></defs>`;
   /* the four bands behind the candles; the chosen one lights */
   const L = LINES.find(l => l.k === sel);
-  ZONES.forEach(([k, a1, b1], i) => { const pick = L && L.k === k, y1 = y(-a1 / 100), y2 = y(-b1 / 100);
-    h += `<rect x="${P.l - 76}" y="${y1}" width="${W - P.l - P.r + 86}" height="${y2 - y1}" style="fill:${pick ? "var(--held)" : "var(--ink)"}" opacity="${pick ? (.1 * mixK).toFixed(3) : i % 2 ? .018 : 0}"/>`;
-    h += `<text x="${P.l - 68}" y="${(y1 + y2) / 2 + 3.5}" class="cap-t" style="fill:${pick ? "var(--gold-d)" : "var(--mut)"}" opacity="${pick ? 1 : .7}">${LINES[i].n.toUpperCase()}</text>`; });
+  ZONES.forEach(([k, a1, b1], i) => { const pick = L && L.k === k, y1 = y(-a1 / 100), y2 = y(-b1 / 100), z = `var(--z${i + 1})`;
+    h += `<rect x="${P.l - 76}" y="${y1}" width="${W - P.l - P.r + 86}" height="${y2 - y1}" style="fill:${z}" opacity="${(pick ? .1 + .14 * mixK : .08).toFixed(3)}"/>`;
+    h += `<rect x="${P.l - 76}" y="${y1 + 1}" width="3" height="${y2 - y1 - 2}" rx="1.5" style="fill:${z}" opacity="${pick ? 1 : .7}"/>`;
+    h += `<text x="${P.l - 66}" y="${(y1 + y2) / 2 + 3.5}" class="cap-t" style="fill:${pick ? "var(--ink)" : "var(--mut)"};font-weight:${pick ? 600 : 400}">${LINES[i].n.toUpperCase()}</text>`; });
   [0, -.1, -.2, -.35, -.5, -.6].forEach(p => h += `<line x1="${P.l - 76}" x2="${W - P.r + 10}" y1="${y(p)}" y2="${y(p)}" style="stroke:var(--grid)"/><text x="${W - 24}" y="${y(p) + 3.5}" text-anchor="end" class="ax">${p ? "−" + Math.round(-p * 100) + "%" : "Peak"}</text>`);
   /* the candles, group by group */
   let x0 = P.l, n = 0;
@@ -470,7 +478,7 @@ function drawFalls(anim) {
     h += `<g style="opacity:${dim}">`;
     f.c.forEach((c, i) => { if (c.l < f.c[lowI].l) lowI = i;
       const cx = x0 + slot * (i + .5), up = c.c >= c.o, yt = y(Math.max(c.o, c.c)), yb = y(Math.min(c.o, c.c)), beyond = on && -c.l * 100 > thr + 1e-6;
-      const base = up ? "kH" : "kB", col = on ? (beyond ? "kB" : "kH") : base, op = on ? .4 + .6 * mixK : .78, wick = col === "kB" ? "#5E0E2C" : "#A9803F";
+      const base = up ? "kH" : "kB", col = on ? (beyond ? "kR" : "kH") : base, op = on ? .4 + .6 * mixK : .78, wick = col === "kR" ? "#A82A23" : col === "kB" ? "#5E0E2C" : "#A9803F";
       h += `<g class="${anim ? "cdl" : ""}" style="--i:${n++};transform-origin:${cx}px ${up ? yb : yt}px;opacity:${op.toFixed(3)}">
         <line x1="${cx}" x2="${cx}" y1="${y(c.h)}" y2="${y(c.l)}" stroke="${wick}" stroke-width="1" stroke-linecap="round"/>
         <rect x="${(cx - cw / 2).toFixed(1)}" y="${yt.toFixed(1)}" width="${cw.toFixed(1)}" height="${Math.max(1.5, yb - yt).toFixed(1)}" rx="${Math.min(2, cw / 3).toFixed(1)}" fill="url(#${col})"${f.now ? ' stroke="var(--card)" stroke-dasharray="2 1.5" stroke-width=".8"' : ""}${on && beyond && mixK > .5 ? ' filter="url(#kg)"' : ""}/></g>`; });
