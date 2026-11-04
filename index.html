@@ -214,7 +214,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .seg button span{align-items:center}
 .seg button b{font-size:14.5px}
 /* V1 answers sit beside two readings */
-.frame[data-v="1"] .reads{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;align-self:center}
+.frame[data-v="1"] .reads{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr;align-self:stretch}
+.frame[data-v="1"] .reads .card{display:flex;flex-direction:column;justify-content:center;padding:18px 22px}
 /* V1 chart: range buttons, a dark tooltip */
 .rng{pointer-events:auto;display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--track);box-shadow:var(--track-shadow)}
 .rng button{height:26px;padding:0 11px;border-radius:999px;font-size:12px;font-weight:500;color:var(--mut);transition:color .3s,background .3s,box-shadow .3s}
@@ -432,7 +433,7 @@ const TLOW = D[iLow][0], RLOW = D[iLow][1] / FPK - 1, sstep = u => u * u * (3 - 
 const shown = i => { if (i < iA) return D[i][1]; const s = scaleNow();
   if (i <= iLow) return FPK * (1 + Math.min(0, D[i][1] / FPK - 1) * s);
   const kLow = (1 + RLOW * s) / (1 + RLOW), u = clamp((D[i][0] - TLOW) / (TN - TLOW), 0, 1);
-  return D[i][1] * (1 + (kLow - 1) * (1 - sstep(Math.min(1, u * 1.6)))); };
+  return D[i][1] * (1 + (kLow - 1) * (1 - sstep(u))); };
 function drawPrice(anim) {
   const r = vis.getBoundingClientRect(), W = Math.max(300, r.width), H = Math.max(300, r.height);
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
@@ -441,7 +442,7 @@ function drawPrice(anim) {
   const x = t => P.l + (t - s0) / (TN - s0) * (W - P.l - P.r), y = v => H - P.b - (v - lo) / (hi - lo) * (H - P.t - P.b);
   const xa = x(FTP), xb = x(FTR), yP = y(FPK), span = W - P.l - P.r, o = v => clamp((v - P.l) / span, 0, 1).toFixed(4);
   let h = `<defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--area)" stop-opacity=".16"/><stop offset="1" style="stop-color:var(--area)" stop-opacity="0"/></linearGradient>
-    <linearGradient id="gr" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--beyond)" stop-opacity=".05"/><stop offset="1" style="stop-color:var(--beyond)" stop-opacity=".32"/></linearGradient>
+    <linearGradient id="gr" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--beyond)" stop-opacity=".05"/><stop offset="1" style="stop-color:var(--beyond)" stop-opacity=".4"/></linearGradient>
     <linearGradient id="gl" gradientUnits="userSpaceOnUse" x1="${P.l}" x2="${W - P.r}" y1="0" y2="0">
       <stop offset="0" style="stop-color:var(--beyond)" stop-opacity="0"/><stop offset="${o(xa - 70)}" style="stop-color:var(--beyond)" stop-opacity="0"/>
       <stop offset="${o(xa + 14)}" style="stop-color:var(--beyond)" stop-opacity="1"/><stop offset="${o(xb - 14)}" style="stop-color:var(--beyond)" stop-opacity="1"/>
@@ -449,7 +450,7 @@ function drawPrice(anim) {
     <clipPath id="below"><rect x="${xa}" y="${yP}" width="${xb - xa}" height="${H}"/></clipPath></defs>`;
   const st = niceStep((hi - lo) / 4);
   for (let v = Math.ceil(lo / st) * st; v < hi; v += st) h += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--grid)"/><text x="${P.l - 12}" y="${y(v) + 3.5}" text-anchor="end" class="ax">${fmt(v)}</text>`;
-  for (let yr = 2012; yr < TN; yr += 2) h += `<text x="${x(yr)}" y="${H - 12}" text-anchor="middle" class="ax">${yr}</text>`;
+  for (let yr = 2010; yr <= 2026; yr += 2) h += `<text x="${clamp(x(yr), P.l, W - P.r)}" y="${H - 12}" text-anchor="${yr === 2010 ? "start" : yr === 2026 ? "end" : "middle"}" class="ax">${yr}</text>`;
   let line = ""; for (let i = i0; i < D.length; i++) line += (i > i0 ? "L" : "M") + x(D[i][0]).toFixed(1) + " " + y(shown(i)).toFixed(1);
   h += `<path class="${anim ? "fade" : ""}" d="${line}L${x(TN)} ${H - P.b}L${x(s0)} ${H - P.b}Z" fill="url(#ga)"/>`;
   /* the fall: shaded between its peak and the line, never over the line */
@@ -457,7 +458,7 @@ function drawPrice(anim) {
   if (on) h += `<g opacity="${mixK.toFixed(3)}"><line x1="${xa - 24}" x2="${xb + 24}" y1="${yP}" y2="${yP}" style="stroke:var(--ink)" stroke-dasharray="3 4" opacity=".4"/></g>`;
   /* one line in maroon; the fall blends into red and back */
   h += `<path class="${anim ? "draw" : ""}" d="${line}" fill="none" style="stroke:var(--line)" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>`;
-  h += `<path d="${line}" fill="none" stroke="url(#gl)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" opacity="${on ? mixK.toFixed(3) : 0}"/>`;
+  h += `<path d="${line}" fill="none" stroke="url(#gl)" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round" opacity="${on ? mixK.toFixed(3) : 0}"/>`;
   /* the low, tracked */
   const lx = x(D[iLow][0]), ly = y(shown(iLow)), depth = FREAL * scaleNow(), mc = on ? "var(--beyond)" : "var(--line)";
   h += `<g class="gps${anim ? " pop" : ""}"><circle class="rp" cx="${lx}" cy="${ly}" r="6" style="fill:${mc}"/><circle class="rp rp2" cx="${lx}" cy="${ly}" r="6" style="fill:${mc}"/><circle cx="${lx}" cy="${ly}" r="7.5" style="fill:var(--card);stroke:${mc}" stroke-width="2.4"/><circle cx="${lx}" cy="${ly}" r="2.8" style="fill:${mc}"/></g>`;
