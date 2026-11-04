@@ -209,6 +209,31 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .frame[data-v="1"] .falls li{height:27px}
 .frame[data-v="1"] .cols{gap:14px;padding-bottom:14px}
 .frame[data-v="1"] .seg{margin-top:20px}
+/* answers: the name and its range only */
+.seg button{justify-content:center;text-align:center}
+.seg button span{align-items:center}
+.seg button b{font-size:14.5px}
+/* V1 answers sit beside two readings */
+.frame[data-v="1"] .reads{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;align-self:center}
+/* V1 chart: range buttons, a dark tooltip */
+.rng{pointer-events:auto;display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--track);box-shadow:var(--track-shadow)}
+.rng button{height:26px;padding:0 11px;border-radius:999px;font-size:12px;font-weight:500;color:var(--mut);transition:color .3s,background .3s,box-shadow .3s}
+.rng button[aria-pressed="true"]{color:var(--pearl-ink);background:var(--pearl);box-shadow:var(--pearl-shadow)}
+.rng button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.frame[data-v="1"] .legend{display:none}
+.frame[data-v="2"] .rng{display:none}
+.chip.up{color:#3E7A5C;background:rgba(62,122,92,.1)}
+[data-theme="dark"] .chip.up{color:#8FD0AE;background:rgba(143,208,174,.1)}
+.tip{position:absolute;left:0;top:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .2s;padding:10px 12px;border-radius:12px;min-width:168px;background:#1F1916;color:#F5EEE3;box-shadow:0 14px 30px -14px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.06);font-size:12px}
+[data-theme="dark"] .tip{background:#2C2521}
+.tip.on{opacity:1}
+.tip small{display:block;margin-bottom:6px;font-size:10.5px;color:rgba(245,238,227,.55)}
+.tip div{display:flex;align-items:center;gap:7px;height:20px;color:rgba(245,238,227,.8)}
+.tip div i{width:3px;height:11px;border-radius:2px;background:#E6C68A}
+.tip div i.r{background:#F0716A}
+.tip div b{margin-left:auto;padding-left:14px;font-weight:500;color:#fff}
+.frame[data-v="2"] .tip{display:none}
+
 /* V2 · falls chart */
 .fname{font-size:11px;font-weight:500;paint-order:stroke;stroke:var(--card);stroke-width:4px;stroke-linejoin:round}
 
@@ -291,7 +316,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
             <div class="v-val"><b class="num" id="val">—</b><span class="chip num" id="chip"></span></div>
             <div class="v-date" id="vdate"></div>
           </div>
-          <div class="legend" id="legend"><span><i></i>Within your line</span><span><i class="b"></i>Beyond it</span></div>
+          <div class="legend" id="legend"><span><i></i>Within your line</span><span><i class="b"></i>Beyond it</span></div><div class="rng" id="rng" role="group" aria-label="Range"></div>
         </div>
         <svg id="g" role="img"></svg>
       </section>
@@ -303,7 +328,6 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
         <div class="reads rise" style="--d:.18s">
           <div class="card"><div class="caps">On ₹10 Cr</div><b class="big num mute" id="rA">—</b><p>at the deepest point</p></div>
           <div class="card"><div class="caps">To get back</div><b class="big num mute" id="rB">—</b><p>to ₹10 Cr</p></div>
-          <div class="card falls"><div class="falls-h"><div class="caps">Falls you’d have held</div><b class="big num mute" id="rC">—</b></div><ul id="fl"></ul></div>
         </div>
       </section>
     </div>
@@ -356,12 +380,10 @@ let sel = null; try { const s = localStorage.getItem("wiq-line"); if (LINES.some
 let thr = null, mixK = 0, raf = 0;
 
 /* ---------------- the four buttons ---------------- */
-$("#seg").innerHTML = LINES.map(l => `<button type="button" role="radio" aria-checked="false" data-k="${l.k}"><i class="coin"><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="${l.ic}"/></svg></i><span><b>${l.n}</b><small>${l.r}</small></span></button>`).join("");
+$("#seg").innerHTML = LINES.map(l => `<button type="button" role="radio" aria-checked="false" data-k="${l.k}"><span><b>${l.n}</b><small>${l.r}</small></span></button>`).join("");
 $("#seg").querySelectorAll("button").forEach(b => b.addEventListener("click", () => choose(b.dataset.k)));
 $("#seg").addEventListener("keydown", e => { if (!/Arrow(Left|Right|Up|Down)/.test(e.key)) return; e.preventDefault();
   const i = LINES.findIndex(l => l.k === sel), n = (i < 0 ? 0 : i + (/Right|Down/.test(e.key) ? 1 : -1) + 4) % 4; choose(LINES[n].k); $("#seg").querySelectorAll("button")[n].focus(); });
-$("#fl").innerHTML = FALLS.map(f => `<li data-k="${f.k}"><span class="mk"><svg viewBox="0 0 12 12"><path class="ok" d="M2.8 6.3l2.1 2.1 4.3-4.6"/><path class="no" d="M3.5 6h5"/></svg></span><span class="y num">${f.k}</span><span>${f.n}</span><span class="d num">−${f.f.toFixed(0)}%</span></li>`).join("");
-
 function countTo(el, txt, anim) {
   const m = txt.match(/[\d.]+/);
   if (!anim || RM || !m) { el.textContent = txt; return; }
@@ -373,15 +395,13 @@ function countTo(el, txt, anim) {
 function readings(anim) {
   const L = LINES.find(l => l.k === sel);
   $("#seg").querySelectorAll("button").forEach(b => { const on = b.dataset.k === sel; b.classList.toggle("on", on); b.setAttribute("aria-checked", on); b.tabIndex = on || (!sel && b.dataset.k === "steady") ? 0 : -1; });
-  ["#rA", "#rB", "#rC"].forEach(s => $(s).classList.toggle("mute", !L));
+  ["#rA", "#rB"].forEach(s => $(s).classList.toggle("mute", !L));
   $("#legend").classList.toggle("on", !!L);
   $("#go").classList.toggle("ready", !!L); $("#go").setAttribute("aria-disabled", !L);
-  if (!L) { $("#rA").textContent = "—"; $("#rB").textContent = "—"; $("#rC").textContent = "—"; return; }
-  const v = L.v / 100, held = FALLS.filter(f => f.f <= L.v).length;
+  if (!L) { $("#rA").textContent = "—"; $("#rB").textContent = "—"; return; }
+  const v = L.v / 100;
   countTo($("#rA"), `₹${(10 * (1 - v)).toFixed(1)} Cr`, anim);
   countTo($("#rB"), `+${((1 / (1 - v) - 1) * 100).toFixed(0)}%`, anim);
-  $("#rC").innerHTML = `${held}<small>of 5</small>`;
-  $("#fl").querySelectorAll("li").forEach(li => { const f = FALLS.find(z => z.k === li.dataset.k), ok = f.f <= L.v; li.classList.toggle("held", ok); li.classList.toggle("over", !ok); });
 }
 function choose(k) {
   if (k === sel) return; sel = k; try { localStorage.setItem("wiq-line", k); } catch (e) {}
@@ -396,52 +416,52 @@ function choose(k) {
 /* ---------------- the chart: price above, fall from peak below ---------------- */
 const svg = $("#g"), vis = $("#vis"); let G = null;
 const gps = (cx, cy, pop) => `<g class="gps${pop ? " pop" : ""}"><circle class="rp" cx="${cx}" cy="${cy}" r="5" style="fill:var(--line)"/><circle class="rp rp2" cx="${cx}" cy="${cy}" r="5" style="fill:var(--line)"/><circle cx="${cx}" cy="${cy}" r="4.6" style="fill:var(--line);stroke:var(--card)" stroke-width="2"/></g>`;
+let RANGE = "max";
+const RANGES = [["1y", "1Y", 1], ["5y", "5Y", 5], ["10y", "10Y", 10], ["max", "Max", 99]];
+const niceStep = r => { const p = Math.pow(10, Math.floor(Math.log10(r))), m = r / p; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p; };
+const tip = (() => { const t = document.createElement("div"); t.className = "tip"; t.setAttribute("aria-hidden", "true"); vis.appendChild(t); return t; })();
 function drawPrice(anim) {
-  const r = vis.getBoundingClientRect(), W = Math.max(300, r.width), H = Math.max(420, r.height);
+  const r = vis.getBoundingClientRect(), W = Math.max(300, r.width), H = Math.max(300, r.height);
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const P = { l: 26, r: 66, t: 112, b: 34 }, gap = 40, ddH = Math.round((H - P.t - P.b - gap) * .3), mainB = H - P.b - ddH - gap, ddT = mainB + gap, ddB = H - P.b;
-  const x = t => P.l + (t - T0) / (TN - T0) * (W - P.l - P.r), L = Math.log, lo = 760, hi = 34000;
-  const y = v => mainB - (L(v) - L(lo)) / (L(hi) - L(lo)) * (mainB - P.t), dy = p => ddT + (-p / .7) * (ddB - ddT);
-  const on = thr != null, held = f => f <= thr + 1e-6;
-  let h = `<defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--area)" stop-opacity=".22"/><stop offset="1" style="stop-color:var(--area)" stop-opacity="0"/></linearGradient>
-    <clipPath id="cIn"><rect x="0" y="${dy(0) - 1}" width="${W}" height="${on ? Math.max(0, dy(-thr / 100) - dy(0) + 1) : 0}"/></clipPath>
-    <clipPath id="cOut"><rect x="0" y="${on ? dy(-thr / 100) : ddB}" width="${W}" height="${ddB}"/></clipPath></defs>`;
-  /* price pane */
-  [1000, 3000, 10000, 30000].forEach(v => h += `<line x1="${P.l}" x2="${W - P.r + 10}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--grid)"/><text x="${W - 24}" y="${y(v) + 3.5}" text-anchor="end" class="ax">${v / 1000}k</text>`);
-  for (let yr = 2004; yr <= 2024; yr += 4) h += `<text x="${x(yr)}" y="${H - 12}" text-anchor="middle" class="ax">${yr}</text>`;
-  const line = D.map(([t, v], i) => (i ? "L" : "M") + x(t).toFixed(1) + " " + y(v).toFixed(1)).join("");
-  h += `<path class="${anim ? "fade" : ""}" d="${line}L${x(TN)} ${mainB}L${x(T0)} ${mainB}Z" fill="url(#ga)"/>`;
-  h += `<path class="${anim ? "draw" : ""}" d="${line}" fill="none" style="stroke:var(--line)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity="${(1 - .45 * mixK).toFixed(3)}"/>`;
-  /* each fall, peak to recovery, takes the colour of your line */
-  if (on) FALLS.forEach(f => { const a = at(D, f.tp), b = at(D, f.tr), c = held(f.f) ? "var(--held)" : "var(--beyond)";
-    let s = ""; for (let i = a; i <= b; i++) s += (i > a ? "L" : "M") + x(D[i][0]).toFixed(1) + " " + y(D[i][1]).toFixed(1);
-    const lw = at(D, f.tt);
-    h += `<path d="${s}" fill="none" style="stroke:${c}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" opacity="${mixK.toFixed(3)}"/>
-      <circle cx="${x(D[lw][0])}" cy="${y(D[lw][1])}" r="3.4" style="fill:var(--card);stroke:${c}" stroke-width="1.6" opacity="${mixK.toFixed(3)}"/>`; });
+  const span = RANGES.find(z => z[0] === RANGE)[2], t0 = Math.max(T0, TN - span), S = D.slice(at(D, t0)), lg = span > 10, on = thr != null;
+  const P = { l: 64, r: 24, t: 122, b: 34 }, vals = S.map(p => p[1]);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (lg) { lo *= .86; hi *= 1.08; } else { const pd = (hi - lo) * .14; lo -= pd; hi += pd * .7; }
+  const s0 = S[0][0], x = t => P.l + (t - s0) / (TN - s0) * (W - P.l - P.r);
+  const y = lg ? v => H - P.b - (Math.log(v) - Math.log(lo)) / (Math.log(hi) - Math.log(lo)) * (H - P.t - P.b) : v => H - P.b - (v - lo) / (hi - lo) * (H - P.t - P.b);
+  let h = `<defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--area)" stop-opacity=".2"/><stop offset="1" style="stop-color:var(--area)" stop-opacity="0"/></linearGradient></defs>`;
+  /* value axis on the left, as the markets show it */
+  let ticks; if (lg) ticks = [500, 1000, 2000, 5000, 10000, 20000, 50000].filter(v => v > lo && v < hi);
+  else { const st = niceStep((hi - lo) / 4); ticks = []; for (let v = Math.ceil(lo / st) * st; v < hi; v += st) ticks.push(v); }
+  ticks.forEach(v => h += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--grid)"/><text x="${P.l - 12}" y="${y(v) + 3.5}" text-anchor="end" class="ax">${fmt(v)}</text>`);
+  /* time axis */
+  if (span <= 1) { for (let m = Math.ceil(s0 * 12); m / 12 < TN; m++) if (m % 3 === 0) { const t = m / 12; if (x(t) > P.l + 20 && x(t) < W - P.r - 20) h += `<text x="${x(t)}" y="${H - 12}" text-anchor="middle" class="ax">${MON[m % 12]} ${Math.floor(t)}</text>`; } }
+  else { const st = span <= 5 ? 1 : span <= 10 ? 2 : 4; for (let yr = Math.ceil(s0); yr < TN; yr++) if (yr % st === 0 && x(yr) > P.l + 16 && x(yr) < W - P.r - 16) h += `<text x="${x(yr)}" y="${H - 12}" text-anchor="middle" class="ax">${yr}</text>`; }
+  const line = S.map(([t, v], i) => (i ? "L" : "M") + x(t).toFixed(1) + " " + y(v).toFixed(1)).join("");
+  /* each fall: a soft column, its pill on top, your line inside it */
+  let over = "", pills = [];
+  if (on) FALLS.forEach(f => { const a0 = Math.max(f.tp, s0), b0 = Math.min(f.tr, TN); if (b0 <= a0) return;
+    const pk = D[at(D, f.tp)][1], lv = pk * (1 - thr / 100), deep = f.f > thr + 1e-6, c = deep ? "var(--beyond)" : "var(--held)", xa = x(a0), xb = x(b0);
+    h += `<rect x="${xa}" y="${P.t - 6}" width="${Math.max(2, xb - xa)}" height="${H - P.b - P.t + 6}" rx="6" style="fill:${c}" opacity="${(.11 * mixK).toFixed(3)}"/>`;
+    if (lv > lo && lv < hi) h += `<line x1="${xa}" x2="${xb}" y1="${y(lv)}" y2="${y(lv)}" style="stroke:${c}" stroke-width="1.2" stroke-dasharray="3 3" opacity="${(.9 * mixK).toFixed(3)}"/>`;
+    /* the stretch of the fall below your line, drawn on the line in red; the rest of a held fall in gold */
+    const i0 = at(D, a0), i1 = at(D, b0); let seg = "", segs = [];
+    for (let i = i0; i <= i1; i++) { const below = D[i][1] < lv; if (below || !deep) seg += (seg ? "L" : "M") + x(D[i][0]).toFixed(1) + " " + y(D[i][1]).toFixed(1); else if (seg) { segs.push(seg); seg = ""; } }
+    if (seg) segs.push(seg);
+    segs.forEach(s => over += `<path d="${s}" fill="none" style="stroke:${c}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" opacity="${mixK.toFixed(3)}"/>`);
+    pills.push({ cx: (xa + xb) / 2, txt: `${f.k} · −${f.f.toFixed(0)}%`, c, xa, xb }); });
+  h += `<path class="${anim ? "fade" : ""}" d="${line}L${x(TN)} ${H - P.b}L${x(s0)} ${H - P.b}Z" fill="url(#ga)"/>`;
+  h += `<path class="${anim ? "draw" : ""}" d="${line}" fill="none" style="stroke:var(--line)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>` + over;
+  /* pills: one row, a second row only where two would touch */
+  let lastR = [-1e9, -1e9];
+  pills.forEach(p => { const w = p.txt.length * 6.1 + 30, row = p.cx - w / 2 > lastR[0] + 6 ? 0 : 1, px = clamp(p.cx - w / 2, P.l, W - P.r - w), py = P.t - 2 + row * 28; lastR[row] = px + w;
+    h += `<g opacity="${mixK.toFixed(3)}"><rect x="${px}" y="${py}" width="${w}" height="22" rx="7" style="fill:${p.c}"/><text x="${px + 10}" y="${py + 15}" style="font-size:11px;font-weight:500;fill:#fff">${p.txt}</text><path d="M${px + w - 14} ${py + 7.5}l3.5 3.5-3.5 3.5" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>`; });
   h += gps(x(TN), y(VN), anim);
-  /* fall-from-peak pane */
-  h += `<text x="${P.l}" y="${ddT - 16}" class="cap-t">FALL FROM PEAK</text>`;
-  { const L = LINES.find(l => l.k === sel); [[0, 10], [10, 20], [20, 35], [35, 70]].forEach(([a1, b1], i) => { const pick = L && L.k === LINES[i].k;
-    h += `<rect x="${P.l}" y="${dy(-a1 / 100)}" width="${W - P.l - P.r + 10}" height="${dy(-b1 / 100) - dy(-a1 / 100)}" style="fill:var(--z${i + 1})" opacity="${(pick ? .1 + .16 * mixK : .07).toFixed(3)}"/>`; }); }
-  [0, -.3, -.6].forEach(p => h += `<line x1="${P.l}" x2="${W - P.r + 10}" y1="${dy(p)}" y2="${dy(p)}" style="stroke:var(--grid)"/><text x="${W - 24}" y="${dy(p) + 3.5}" text-anchor="end" class="ax">${p ? "−" + Math.abs(p * 100) + "%" : "0%"}</text>`);
-  const dd = `M${x(T0)} ${dy(0)}` + D.map(([t], i) => "L" + x(t).toFixed(1) + " " + dy(DD[i]).toFixed(1)).join("") + `L${x(TN)} ${dy(0)}Z`;
-  h += `<g class="${anim ? "drop" : ""}"><path d="${dd}" style="fill:var(--ink)" opacity="${(.1 * (1 - mixK)).toFixed(3)}"/>`;
-  if (on) h += `<path d="${dd}" clip-path="url(#cIn)" style="fill:var(--held)" opacity="${(.42 * mixK).toFixed(3)}"/><path d="${dd}" clip-path="url(#cOut)" style="fill:var(--beyond)" opacity="${(.62 * mixK).toFixed(3)}"/>`;
-  h += `<path d="${D.map(([t], i) => (i ? "L" : "M") + x(t).toFixed(1) + " " + dy(DD[i]).toFixed(1)).join("")}" fill="none" style="stroke:var(--ink)" stroke-width=".8" opacity=".35"/></g>`;
-  /* depth of each fall, under its low */
-  FALLS.forEach(f => { let lw = at(D, f.tp); for (let i = lw, e = at(D, f.tr); i <= e; i++) if (DD[i] < DD[lw]) lw = i;
-    const c = on ? (held(f.f) ? "var(--held)" : "var(--beyond)") : "var(--ink-2)";
-    h += `<text class="fl ${anim ? "fade" : ""}" x="${clamp(x(D[lw][0]), P.l + 14, W - P.r - 14)}" y="${dy(DD[lw]) + 15}" text-anchor="middle" style="fill:${c}">−${f.f.toFixed(0)}%</text>`; });
-  /* your line */
-  if (on) { const ly = dy(-thr / 100);
-    h += `<g opacity="${mixK.toFixed(3)}"><rect x="${P.l}" y="${dy(0)}" width="${W - P.l - P.r + 10}" height="${ly - dy(0)}" style="fill:var(--held)" opacity=".06"/>
-      <line x1="${P.l}" x2="${W - P.r + 10}" y1="${ly}" y2="${ly}" style="stroke:var(--ink)" stroke-width="1" stroke-dasharray="4 4" opacity=".6"/>
-      <rect x="${W - P.r + 12}" y="${ly - 10}" width="${P.r - 18}" height="20" rx="10" style="fill:var(--acc)"/><text x="${W - P.r + 12 + (P.r - 18) / 2}" y="${ly + 4}" text-anchor="middle" style="font-size:10.5px;font-weight:500;fill:var(--card)">−${thr.toFixed(0)}%</text></g>`; }
-  h += `<g id="hv" style="display:none"><line id="hvl" y1="${P.t - 8}" y2="${ddB}" style="stroke:var(--ink)" stroke-width="1" opacity=".18"/><circle id="hv1" r="4" style="fill:var(--card);stroke:var(--line)" stroke-width="1.8"/><circle id="hv2" r="3" style="fill:var(--ink)"/></g><rect x="0" y="${P.t - 20}" width="${W}" height="${H - P.t + 20}" fill="transparent"/>`;
+  h += `<g id="hv" style="display:none"><line id="hvl" y1="${P.t - 6}" y2="${H - P.b}" style="stroke:var(--ink)" stroke-width="1" opacity=".2"/><circle id="hv1" r="7" style="fill:var(--card);stroke:var(--ink)" stroke-width="2.2"/></g><rect x="0" y="${P.t - 20}" width="${W}" height="${H - P.t + 20}" fill="transparent"/>`;
   svg.innerHTML = h;
   svg.querySelectorAll(".draw").forEach(p => p.style.setProperty("--len", Math.ceil(p.getTotalLength())));
-  svg.setAttribute("aria-label", `Nifty 50 since 2000, now ${fmt(VN)}${on ? `; your line at −${thr.toFixed(0)}%` : ""}`);
-  G = { x, y, dy, W, P };
+  svg.setAttribute("aria-label", `Nifty 50, ${RANGES.find(z => z[0] === RANGE)[1]}, now ${fmt(VN)}${on ? `; falls marked against your line at −${thr.toFixed(0)}%` : ""}`);
+  G = { x, y, W, H, P, s0 };
 }
 /* V2: each fall as a group of two-month candles, peak to low to recovery, beside the four bands */
 const CUR = CRASH_V2.find(e => !e.r);
@@ -504,10 +524,11 @@ function headDefault() {
     else { $("#val").textContent = "−60%"; c.textContent = "Deepest · 2008"; c.classList.add("dn"); $("#vdate").textContent = "Each group runs from a peak, through the fall, to recovery"; }
     return;
   }
-  $("#vcap").textContent = "Nifty 50 · since 2000";
+  const R = RANGES.find(z => z[0] === RANGE), s0 = Math.max(T0, TN - R[2]), ch = (VN / D[at(D, s0)][1] - 1) * 100;
+  $("#vcap").textContent = "Nifty 50";
   $("#val").textContent = fmt(VN);
-  const c = $("#chip"); c.textContent = `−${Math.abs(NOW * 100).toFixed(1)}% from its high`; c.classList.add("dn");
-  $("#vdate").textContent = `Today · ${my(TN)}`;
+  const c = $("#chip"); c.textContent = `${ch >= 0 ? "↑ +" : "↓ −"}${Math.abs(ch).toLocaleString("en-IN", { maximumFractionDigits: 1 })}% · ${R[2] > 20 ? "since 2000" : "past " + R[1]}`; c.classList.toggle("dn", ch < 0); c.classList.toggle("up", ch >= 0);
+  $("#vdate").textContent = `As of ${my(TN)}`;
 }
 svg.addEventListener("pointermove", e => { if (!G) return;
   if (G.fallsChart) { const r = svg.getBoundingClientRect(), px = e.clientX - r.left;
@@ -516,14 +537,13 @@ svg.addEventListener("pointermove", e => { if (!G) return;
     $("#val").textContent = `−${best.f.toFixed(1)}%`; const c = $("#chip"); c.textContent = best.now ? "Today's dip" : best.n; c.classList.add("dn");
     $("#vdate").textContent = best.now ? "Since January’s high, still recovering" : `${best.k} · ${best.mo} months from peak to recovery`; return; } const r = svg.getBoundingClientRect(), px = e.clientX - r.left;
   if (px < G.P.l || px > G.W - G.P.r) return leave();
-  const t = T0 + (px - G.P.l) / (G.W - G.P.l - G.P.r) * (TN - T0), i = at(D, t), cx = G.x(D[i][0]);
-  $("#hv").style.display = ""; $("#hvl").setAttribute("x1", cx); $("#hvl").setAttribute("x2", cx);
-  $("#hv1").setAttribute("cx", cx); $("#hv1").setAttribute("cy", G.y(D[i][1])); $("#hv2").setAttribute("cx", cx); $("#hv2").setAttribute("cy", G.dy(DD[i]));
-  $("#val").textContent = fmt(D[i][1]);
-  const c = $("#chip"), p = DD[i] * 100; c.textContent = p < -.5 ? `−${Math.abs(p).toFixed(1)}% from its high` : "At its high"; c.classList.toggle("dn", p < -.5);
-  $("#vdate").textContent = my(D[i][0]);
+  const t = G.s0 + (px - G.P.l) / (G.W - G.P.l - G.P.r) * (TN - G.s0), i = at(D, t), cx = G.x(D[i][0]), cy = G.y(D[i][1]), p = DD[i] * 100;
+  $("#hv").style.display = ""; $("#hvl").setAttribute("x1", cx); $("#hvl").setAttribute("x2", cx); $("#hv1").setAttribute("cx", cx); $("#hv1").setAttribute("cy", cy);
+  tip.innerHTML = `<small>${my(D[i][0])}</small><div><i></i>Nifty 50<b class="num">${fmt(D[i][1])}</b></div><div><i class="r"></i>From its high<b class="num">${p < -.5 ? "−" + Math.abs(p).toFixed(1) + "%" : "At high"}</b></div>`;
+  const tw = tip.offsetWidth, th = tip.offsetHeight, left = cx + 16 + tw > G.W - 8 ? cx - 16 - tw : cx + 16;
+  tip.style.transform = `translate(${left}px,${clamp(cy - th - 12, G.P.t - 10, G.H - th - 40)}px)`; tip.classList.add("on");
 });
-function leave() { const g = $("#hv"); if (g) g.style.display = "none"; if (hovF) { hovF = null; draw(false); } headDefault(); }
+function leave() { const g = $("#hv"); if (g) g.style.display = "none"; tip.classList.remove("on"); if (hovF) { hovF = null; draw(false); } headDefault(); }
 svg.addEventListener("pointerleave", leave);
 
 /* ---------------- theme, why, continue ---------------- */
@@ -532,6 +552,10 @@ const mark = () => tb.forEach(b => b.classList.toggle("on", b.dataset.t === docu
 tb.forEach(b => b.addEventListener("click", () => { document.documentElement.dataset.theme = b.dataset.t; try { localStorage.setItem("wiq-theme", b.dataset.t); } catch (e) {} mark(); }));
 mark();
 $(".why-b").addEventListener("click", () => { const w = $("#why"), o = !w.classList.contains("open"); w.classList.toggle("open", o); $(".why-b").setAttribute("aria-expanded", o); });
+
+/* range buttons for V1 */
+$("#rng").innerHTML = RANGES.map(([k, l]) => `<button type="button" data-r="${k}" aria-pressed="${k === RANGE}">${l}</button>`).join("");
+$("#rng").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { RANGE = b.dataset.r; $("#rng").querySelectorAll("button").forEach(z => z.setAttribute("aria-pressed", z === b)); headDefault(); draw(true); }));
 
 /* V1 / V2 */
 const vb = document.querySelectorAll(".vsw button");
