@@ -421,46 +421,52 @@ let RANGE = "max";
 const RANGES = [["1y", "1Y", 1], ["5y", "5Y", 5], ["10y", "10Y", 10], ["max", "Max", 99]];
 const niceStep = r => { const p = Math.pow(10, Math.floor(Math.log10(r))), m = r / p; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p; };
 const tip = (() => { const t = document.createElement("div"); t.className = "tip"; t.setAttribute("aria-hidden", "true"); vis.appendChild(t); return t; })();
-/* V1: one real Nifty fall (2015–17), peak to recovery, on ₹10 Cr; the whole path reshapes to your depth */
-const SH = (() => { const e = CRASH_V2.find(z => z.p.startsWith("2015")), tp = ty(e.p), tr = ty(e.r), pk = D[at(D, tp)][1], a0 = at(D, tp - .5), b0 = at(D, Math.min(TN, tr + .45)), pts = [];
-  for (let i = a0; i <= b0; i += 2) pts.push([(D[i][0] - tp) * 12, D[i][1] / pk - 1]);
-  let lw = 0; pts.forEach((p, i) => { if (p[1] < pts[lw][1]) lw = i; });
-  return { pts, lw, real: -pts[lw][1] * 100, m0: pts[0][0], m1: pts[pts.length - 1][0], rec: (tr - tp) * 12 }; })();
-const scaleNow = () => thr == null ? 1 : 1 + (thr / SH.real - 1) * mixK;
-const smooth = P => P.map((p, i) => { if (!i) return `M${p[0].toFixed(1)} ${p[1].toFixed(1)}`; const a = P[i - 2] || P[i - 1], b = P[i - 1], c = p, d = P[i + 1] || p;
-  return `C${(b[0] + (c[0] - a[0]) / 6).toFixed(1)} ${(b[1] + (c[1] - a[1]) / 6).toFixed(1)} ${(c[0] - (d[0] - b[0]) / 6).toFixed(1)} ${(c[1] - (d[1] - b[1]) / 6).toFixed(1)} ${c[0].toFixed(1)} ${c[1].toFixed(1)}`; }).join("");
+/* V1: the Nifty since 2010; the 2020 fall, near the centre, reshapes to your depth */
+const V1T = 2010, FX = CRASH_V2.find(z => z.p.startsWith("2020")), FTP = ty(FX.p), FTR = ty(FX.r), iA = at(D, FTP), iB = at(D, FTR), FPK = D[iA][1];
+const FREAL = (() => { let m = 0; for (let i = iA; i <= iB; i++) m = Math.min(m, D[i][1] / FPK - 1); return -m * 100; })();
+let iLow = iA; for (let i = iA; i <= iB; i++) if (D[i][1] < D[iLow][1]) iLow = i;
+const scaleNow = () => thr == null ? 1 : 1 + (thr / FREAL - 1) * mixK;
+/* inside the fall the depth below the peak is scaled; at the peak and at recovery it is zero, so the line joins without a kink */
+const shown = i => { if (i < iA || i > iB) return D[i][1]; const dd = Math.min(0, D[i][1] / FPK - 1); return D[i][1] + FPK * dd * (scaleNow() - 1); };
 function drawPrice(anim) {
   const r = vis.getBoundingClientRect(), W = Math.max(300, r.width), H = Math.max(300, r.height);
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const on = thr != null, s = scaleNow(), P = { l: 70, r: 40, t: 128, b: 34 }, lo = 3.7, hi = 10 * (1 + Math.max(...SH.pts.map(p => p[1])) * 45 / SH.real) + .4;
-  const x = m => P.l + (m - SH.m0) / (SH.m1 - SH.m0) * (W - P.l - P.r), y = v => H - P.b - (v - lo) / (hi - lo) * (H - P.t - P.b);
-  const val = rr => 10 * (1 + rr * s), XY = SH.pts.map(([m, rr]) => [x(m), y(val(rr))]), yP = y(10);
+  const i0 = at(D, V1T), on = thr != null, P = { l: 64, r: 28, t: 112, b: 34 }, s0 = D[i0][0];
+  const vals = D.slice(i0).map(p => p[1]), lo = Math.min(Math.min(...vals), FPK * .5) * .85, hi = Math.max(...vals) * 1.05;
+  const x = t => P.l + (t - s0) / (TN - s0) * (W - P.l - P.r), y = v => H - P.b - (v - lo) / (hi - lo) * (H - P.t - P.b);
+  const xa = x(FTP), xb = x(FTR), yP = y(FPK), span = W - P.l - P.r, o = v => clamp((v - P.l) / span, 0, 1).toFixed(4);
   let h = `<defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--area)" stop-opacity=".16"/><stop offset="1" style="stop-color:var(--area)" stop-opacity="0"/></linearGradient>
-    <linearGradient id="gr" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--beyond)" stop-opacity=".06"/><stop offset="1" style="stop-color:var(--beyond)" stop-opacity=".3"/></linearGradient>
-    <clipPath id="below"><rect x="0" y="${yP}" width="${W}" height="${H}"/></clipPath></defs>`;
-  for (let v = 4; v < hi; v++) h += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--grid)"/><text x="${P.l - 12}" y="${y(v) + 3.5}" text-anchor="end" class="ax">₹${v} Cr</text>`;
-  [[0, "Peak"], [6, "6 mo"], [12, "1 yr"], [18, "18 mo"], [SH.rec, "Recovered"]].forEach(([m, l]) => { if (m > SH.m0 && m < SH.m1) h += `<text x="${x(m)}" y="${H - 12}" text-anchor="middle" class="ax">${l}</text>`; });
-  const line = smooth(XY);
-  /* the fall: shaded between where you started and the line, nothing over the line */
-  h += `<path class="${anim ? "fade" : ""}" d="${line}L${XY[XY.length - 1][0]} ${H - P.b}L${XY[0][0]} ${H - P.b}Z" fill="url(#ga)"/>`;
-  h += `<path d="${line}L${XY[XY.length - 1][0]} ${yP}L${XY[0][0]} ${yP}Z" clip-path="url(#below)" fill="url(#gr)" opacity="${on ? (.35 + .65 * mixK).toFixed(3) : .35}"/>`;
-  h += `<line x1="${P.l}" x2="${W - P.r}" y1="${yP}" y2="${yP}" style="stroke:var(--ink)" stroke-dasharray="3 4" opacity=".4"/><text x="${P.l + 8}" y="${yP - 8}" class="cap-t">WHERE YOU STARTED</text>`;
-  h += `<path class="${anim ? "draw" : ""}" d="${line}" fill="none" style="stroke:var(--line)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-  h += `<path d="${line}" clip-path="url(#below)" fill="none" style="stroke:var(--beyond)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="${on ? mixK.toFixed(3) : 0}"/>`;
-  /* the low, tracked: a GPS marker in the centre, its depth beneath, a card beside it */
-  const [lx, ly] = XY[SH.lw], depth = SH.real * s, mc = on ? "var(--beyond)" : "var(--line)";
+    <linearGradient id="gr" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--beyond)" stop-opacity=".05"/><stop offset="1" style="stop-color:var(--beyond)" stop-opacity=".32"/></linearGradient>
+    <linearGradient id="gl" gradientUnits="userSpaceOnUse" x1="${P.l}" x2="${W - P.r}" y1="0" y2="0">
+      <stop offset="0" style="stop-color:var(--beyond)" stop-opacity="0"/><stop offset="${o(xa - 70)}" style="stop-color:var(--beyond)" stop-opacity="0"/>
+      <stop offset="${o(xa + 14)}" style="stop-color:var(--beyond)" stop-opacity="1"/><stop offset="${o(xb - 14)}" style="stop-color:var(--beyond)" stop-opacity="1"/>
+      <stop offset="${o(xb + 70)}" style="stop-color:var(--beyond)" stop-opacity="0"/><stop offset="1" style="stop-color:var(--beyond)" stop-opacity="0"/></linearGradient>
+    <clipPath id="below"><rect x="${xa}" y="${yP}" width="${xb - xa}" height="${H}"/></clipPath></defs>`;
+  const st = niceStep((hi - lo) / 4);
+  for (let v = Math.ceil(lo / st) * st; v < hi; v += st) h += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--grid)"/><text x="${P.l - 12}" y="${y(v) + 3.5}" text-anchor="end" class="ax">${fmt(v)}</text>`;
+  for (let yr = 2012; yr < TN; yr += 2) h += `<text x="${x(yr)}" y="${H - 12}" text-anchor="middle" class="ax">${yr}</text>`;
+  let line = ""; for (let i = i0; i < D.length; i++) line += (i > i0 ? "L" : "M") + x(D[i][0]).toFixed(1) + " " + y(shown(i)).toFixed(1);
+  h += `<path class="${anim ? "fade" : ""}" d="${line}L${x(TN)} ${H - P.b}L${x(s0)} ${H - P.b}Z" fill="url(#ga)"/>`;
+  /* the fall: shaded between its peak and the line, never over the line */
+  h += `<path d="${line}L${x(TN)} ${yP}L${x(s0)} ${yP}Z" clip-path="url(#below)" fill="url(#gr)" opacity="${on ? mixK.toFixed(3) : 0}"/>`;
+  if (on) h += `<g opacity="${mixK.toFixed(3)}"><line x1="${xa - 24}" x2="${xb + 24}" y1="${yP}" y2="${yP}" style="stroke:var(--ink)" stroke-dasharray="3 4" opacity=".4"/></g>`;
+  /* one line in maroon; the fall blends into red and back */
+  h += `<path class="${anim ? "draw" : ""}" d="${line}" fill="none" style="stroke:var(--line)" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>`;
+  h += `<path d="${line}" fill="none" stroke="url(#gl)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" opacity="${on ? mixK.toFixed(3) : 0}"/>`;
+  /* the low, tracked */
+  const lx = x(D[iLow][0]), ly = y(shown(iLow)), depth = FREAL * scaleNow(), mc = on ? "var(--beyond)" : "var(--line)";
   h += `<g class="gps${anim ? " pop" : ""}"><circle class="rp" cx="${lx}" cy="${ly}" r="6" style="fill:${mc}"/><circle class="rp rp2" cx="${lx}" cy="${ly}" r="6" style="fill:${mc}"/><circle cx="${lx}" cy="${ly}" r="7.5" style="fill:var(--card);stroke:${mc}" stroke-width="2.4"/><circle cx="${lx}" cy="${ly}" r="2.8" style="fill:${mc}"/></g>`;
   h += `<g><rect x="${lx - 30}" y="${ly + 18}" width="60" height="22" rx="11" style="fill:var(--card);stroke:var(--hair)"/><circle cx="${lx - 18}" cy="${ly + 29}" r="3" style="fill:${mc}"/><text x="${lx + 6}" y="${ly + 33}" text-anchor="middle" style="font-size:11px;font-weight:500;fill:var(--ink)">−${depth.toFixed(0)}%</text></g>`;
-  if (on) { const L = LINES.find(l => l.k === sel), cw = 170, ch = 58, cx = clamp(lx + 26, P.l, W - P.r - cw), cy = clamp(ly - ch / 2 - 30, P.t, H - P.b - ch);
-    h += `<g opacity="${mixK.toFixed(3)}"><rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" rx="12" fill="#1F1916"/>
+  if (on) { const L = LINES.find(l => l.k === sel), cw = 170, ch = 58, cx = clamp(lx - cw * .78, P.l, W - P.r - cw), cy = clamp(yP - ch - 34, P.t - 4, H - P.b - ch);
+    h += `<g opacity="${mixK.toFixed(3)}"><line x1="${lx}" x2="${lx}" y1="${cy + ch}" y2="${ly - 10}" style="stroke:var(--beyond)" stroke-dasharray="2 3" opacity=".6"/><rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" rx="12" fill="#1F1916"/>
       <text x="${cx + 14}" y="${cy + 19}" style="font-size:10.5px;fill:rgba(245,238,227,.55)">${L ? L.n : ""} · at the low</text>
       <rect x="${cx + 14}" y="${cy + 30}" width="3" height="12" rx="1.5" fill="#F0716A"/><text x="${cx + 24}" y="${cy + 40}" style="font-size:12px;fill:rgba(245,238,227,.85)">₹10 Cr</text>
       <text x="${cx + cw - 14}" y="${cy + 40}" text-anchor="end" style="font-size:12px;font-weight:500;fill:#fff">₹${(10 * (1 - depth / 100)).toFixed(1)} Cr</text></g>`; }
   h += `<g id="hv" style="display:none"><line id="hvl" y1="${P.t - 6}" y2="${H - P.b}" style="stroke:var(--ink)" stroke-width="1" opacity=".2"/><circle id="hv1" r="6" style="fill:var(--card);stroke:var(--ink)" stroke-width="2"/></g><rect x="0" y="${P.t - 20}" width="${W}" height="${H - P.t + 20}" fill="transparent"/>`;
   svg.innerHTML = h;
   svg.querySelectorAll(".draw").forEach(p => p.style.setProperty("--len", Math.ceil(p.getTotalLength())));
-  svg.setAttribute("aria-label", `The 2015 to 2017 Nifty fall on ₹10 Cr, drawn to a low of −${depth.toFixed(0)}%`);
-  G = { x, y, W, H, P, XY, val };
+  svg.setAttribute("aria-label", `Nifty 50 since 2010; the 2020 fall drawn to a low of −${depth.toFixed(0)}%`);
+  G = { x, y, W, H, P, s0 };
 }
 /* V2: each fall as a group of two-month candles, peak to low to recovery, beside the four bands */
 const CUR = CRASH_V2.find(e => !e.r);
@@ -524,9 +530,9 @@ function headDefault() {
     return;
   }
   const L = LINES.find(l => l.k === sel);
-  $("#vcap").textContent = "Nifty 50 · a real fall, 2015 – 17";
-  $("#val").textContent = L ? `−${L.v}%` : `−${SH.real.toFixed(0)}%`;
-  $("#vdate").textContent = L ? `${L.n} · the same fall, taken to your line` : "Peak to recovery, on ₹10 Cr";
+  $("#vcap").textContent = "Nifty 50 · 2010 – today";
+  $("#val").textContent = L ? `−${L.v}%` : fmt(VN);
+  $("#vdate").textContent = L ? `${L.n} · the 2020 fall, taken to your line` : `As of ${my(TN)}`;
 }
 svg.addEventListener("pointermove", e => { if (!G) return;
   if (G.fallsChart) { const r = svg.getBoundingClientRect(), px = e.clientX - r.left;
@@ -535,11 +541,10 @@ svg.addEventListener("pointermove", e => { if (!G) return;
     $("#val").textContent = `−${best.f.toFixed(1)}%`; const c = $("#chip"); c.textContent = best.now ? "Today's dip" : best.n; c.classList.add("dn");
     $("#vdate").textContent = best.now ? "Since January’s high, still recovering" : `${best.k} · ${best.mo} months from peak to recovery`; return; } const r = svg.getBoundingClientRect(), px = e.clientX - r.left;
   if (px < G.P.l || px > G.W - G.P.r) return leave();
-  let i = 0; G.XY.forEach((p, j) => { if (Math.abs(p[0] - px) < Math.abs(G.XY[i][0] - px)) i = j; });
-  const [cx, cy] = G.XY[i], m = SH.pts[i][0], v = G.val(SH.pts[i][1]), p = (v / 10 - 1) * 100;
+  const t = G.s0 + (px - G.P.l) / (G.W - G.P.l - G.P.r) * (TN - G.s0), i = at(D, t), v = shown(i), cx = G.x(D[i][0]), cy = G.y(v), bent = thr != null && i >= iA && i <= iB;
   $("#hv").style.display = ""; $("#hvl").setAttribute("x1", cx); $("#hvl").setAttribute("x2", cx); $("#hv1").setAttribute("cx", cx); $("#hv1").setAttribute("cy", cy);
-  const when = Math.abs(m) < .5 ? "At the peak" : m < 0 ? `${Math.round(-m)} months before the peak` : `${Math.round(m)} months after the peak`;
-  tip.innerHTML = `<small>${when}</small><div><i></i>Your ₹10 Cr<b class="num">₹${v.toFixed(2)} Cr</b></div><div><i class="r"></i>From the peak<b class="num">${p >= 0 ? "+" : "−"}${Math.abs(p).toFixed(1)}%</b></div>`;
+  const p = bent ? (v / FPK - 1) * 100 : DD[i] * 100;
+  tip.innerHTML = `<small>${my(D[i][0])}${bent ? " · at your line" : ""}</small><div><i></i>Nifty 50<b class="num">${fmt(v)}</b></div><div><i class="r"></i>From its high<b class="num">${p < -.5 ? "−" + Math.abs(p).toFixed(1) + "%" : "At high"}</b></div>`;
   const tw = tip.offsetWidth, th = tip.offsetHeight, left = cx + 16 + tw > G.W - 8 ? cx - 16 - tw : cx + 16;
   tip.style.transform = `translate(${left}px,${clamp(cy - th - 12, G.P.t - 10, G.H - th - 40)}px)`; tip.classList.add("on");
 });
