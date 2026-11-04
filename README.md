@@ -1,5 +1,10 @@
 # WealthIQ · Instinct page
 
-Version 1 of the ASPIRE Instinct chapter: Nifty 50 yearly candles for "How much of a fall could you sit through?" beside a Nifty line for "Two more flat years. What would you do?".
+One question: how deep a fall could you sit through? Steady, Measured, Bold or Fearless, against the Nifty 50 since 2000.
 
-Live: https://anindadas448-web.github.io/wealthiq-instinct/
+- V1 Stacked: the Nifty 50 with its fall-from-peak strip across the top, the answers below.
+- V2 Split: one candle per fall beside the answers.
+
+Live: https://anindadas448-web.github.io/wealthiq-instinct/ (add ?v=2 for the split version)
+
+The earlier two-question page is at v3.html.

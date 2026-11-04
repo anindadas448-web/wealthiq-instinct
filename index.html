@@ -9,431 +9,523 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap">
 <style>
+/* tokens: the same family as the Source page */
 :root{
-  --bg:#F4EEE3; --shell:#FFFDF9; --panel:#FFFFFF; --ink:#2E231B; --body:#4A3C31; --mut:#8C7F70; --faint:#B9AE9F;
-  --line:rgba(46,35,27,.08); --line2:rgba(46,35,27,.14); --grid:rgba(46,35,27,.05);
-  --maroon:#3D0016; --gold:#C29A57; --gold-l:#E3C892;
-  --up:#C29A57; --dn:#5E0E2C;
-  --track:#F2ECE3; --selbg:#FBF6EE;
-  --ease:cubic-bezier(.22,1,.36,1);
-  --f:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --page:#F4EEE3; --card:#FFFDF9; --card-edge:rgba(49,37,29,.07); --acc:#3D0016; --gold:#C9A04A; --gold-d:#9E7438; --gold-l:#E6C68A;
+  --ink:#2E231B; --ink-2:rgba(46,35,27,.72); --mut:rgba(46,35,27,.5); --hair:rgba(46,35,27,.1); --panel:#FFFFFF;
+  --track:linear-gradient(180deg,#E9E0D2 0%,#F2ECE2 100%);
+  --track-shadow:inset 0 1px 2px rgba(49,37,29,.16),inset 0 -1px 1px rgba(255,255,255,.95),0 1px 0 rgba(255,255,255,.7);
+  --pearl:linear-gradient(180deg,#FFFFFF 0%,#F8F3EB 100%);
+  --pearl-shadow:inset 0 1px 0 #FFFFFF,inset 0 0 0 1px rgba(49,37,29,.05),0 1px 2px rgba(49,37,29,.16),0 6px 14px -6px rgba(49,37,29,.28);
+  --pearl-ink:#3D0016;
+  --vis:radial-gradient(circle,rgba(46,35,27,.09) 1px,transparent 1.4px) 0 0/22px 22px,linear-gradient(180deg,#FFFFFF,#FBF8F3);
+  --shadow:0 2px 6px rgba(49,37,29,.04),0 40px 100px -50px rgba(49,37,29,.35);
+  /* chart */
+  --line:#5E1630; --grid:rgba(46,35,27,.06); --axis:rgba(46,35,27,.42);
+  --held:#B98A46; --beyond:#8C2A42; --area:#C9A04A;
+  --soft:cubic-bezier(.22,1,.36,1); --snap:cubic-bezier(.32,.72,0,1);
+  --f:"Outfit","Helvetica Neue",Arial,sans-serif;
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#110D0B; --shell:#18130F; --panel:#1D1713; --ink:#F2EADF; --body:#D6CBBE; --mut:#9A8E80; --faint:#6E645A;
-  --line:rgba(242,234,223,.08); --line2:rgba(242,234,223,.15); --grid:rgba(242,234,223,.05);
-  --maroon:#E7B9C6; --gold:#D6B06A; --up:#D6B06A; --dn:#C9637F; --track:#2A221D; --selbg:#251C17; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#110D0B; --shell:#18130F; --panel:#1D1713; --ink:#F2EADF; --body:#D6CBBE; --mut:#9A8E80; --faint:#6E645A;
-  --line:rgba(242,234,223,.08); --line2:rgba(242,234,223,.15); --grid:rgba(242,234,223,.05);
-  --maroon:#E7B9C6; --gold:#D6B06A; --up:#D6B06A; --dn:#C9637F; --track:#2A221D; --selbg:#251C17; color-scheme:dark}
+[data-theme="dark"]{
+  --page:#0A0807; --card:#14110F; --card-edge:rgba(255,255,255,.06); --acc:#E6C68A;
+  --ink:#F5EEE3; --ink-2:rgba(245,238,227,.74); --mut:rgba(245,238,227,.5); --hair:rgba(255,255,255,.1); --panel:#1A1512;
+  --track:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(255,255,255,.04) 100%);
+  --track-shadow:inset 0 1px 2px rgba(0,0,0,.6),inset 0 -1px 0 rgba(255,255,255,.06);
+  --pearl:linear-gradient(180deg,#3A322C 0%,#26201C 100%);
+  --pearl-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 2px rgba(0,0,0,.5),0 6px 14px -6px rgba(0,0,0,.6);
+  --pearl-ink:#E6C68A;
+  --vis:radial-gradient(circle,rgba(255,255,255,.07) 1px,transparent 1.4px) 0 0/22px 22px,#110E0C;
+  --shadow:0 40px 100px -40px rgba(0,0,0,.9);
+  --line:#E6C68A; --grid:rgba(255,255,255,.06); --axis:rgba(245,238,227,.42);
+  --held:#E6C68A; --beyond:#D9798F; --area:#E6C68A;
+  color-scheme:dark;
+}
 
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--body);font-family:var(--f);-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1}
-button{font:inherit;color:inherit}
+html,body{margin:0}
+body{min-height:100svh;background:var(--page);color:var(--ink);font:15px/1.4 var(--f);-webkit-font-smoothing:antialiased;display:grid;place-items:center;padding:18px;transition:background .4s}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.num{font-variant-numeric:tabular-nums}
+.qi{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.caps{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
 
-.shell{max-width:1640px;margin:20px auto;background:var(--shell);border-radius:28px;padding:22px 36px 24px;box-shadow:0 0 0 1px var(--line),0 30px 70px -50px rgba(61,0,22,.35)}
+/* frame + bar */
+.frame{width:min(1640px,100%);min-height:min(calc(100svh - 36px),1060px);display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px;padding:10px;border-radius:30px;background:var(--card);box-shadow:var(--shadow),inset 0 0 0 1px var(--card-edge),inset 0 1px 0 rgba(255,255,255,.05);transition:background .4s}
+.bar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:44px;padding:12px 18px 4px}
+.logo{display:flex;color:var(--acc)}
+[data-theme="dark"] .logo{color:var(--ink)}
+.logo svg{height:30px;width:auto}
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;width:100%;max-width:820px;justify-self:center}
+.st{display:flex;flex-direction:column;gap:10px;padding:6px 0 2px}
+.st i{display:block;height:2px;border-radius:2px;background:var(--hair);position:relative;overflow:hidden}
+.st i::after{content:"";position:absolute;inset:0;transform-origin:0 50%;transform:scaleX(0);background:var(--acc)}
+.st.done i::after{transform:scaleX(1)}
+.st.now i::after{transform:scaleX(1);background:linear-gradient(90deg,#B98A46,#E6C68A)}
+.st span{display:flex;align-items:baseline;gap:7px;font-size:13px;color:var(--mut);white-space:nowrap}
+.st em{font-style:normal;font-size:10.5px;letter-spacing:.04em;color:var(--mut)}
+.st.done span{color:var(--ink-2)}
+.st.now span{color:var(--ink);font-weight:500}
+.st.now em{color:#B98A46}
+.theme{display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--track);box-shadow:var(--track-shadow);justify-self:end}
+.theme button{width:32px;height:30px;border-radius:999px;display:grid;place-items:center;color:var(--mut);transition:color .3s,background .3s,box-shadow .3s}
+.theme button .qi{width:15px;height:15px}
+.theme button.on{color:var(--pearl-ink);background:var(--pearl);box-shadow:var(--pearl-shadow)}
 
-/* header: wordmark · chapters · count */
-.top{display:flex;align-items:center;gap:40px}
-.wm{color:var(--maroon);line-height:0;flex:none}
-.wm svg{display:block;height:30px;width:auto}
-.tabs{flex:1;display:flex;gap:12px;justify-content:center}
-.tab{width:126px;padding-top:14px;border-top:2px solid var(--line2);font-size:13px;color:var(--mut);white-space:nowrap}
-.tab small{font-size:11px;margin-right:6px;color:var(--faint)}
-.tab.done{border-color:var(--maroon);color:var(--body)}
-.tab.on{border-color:var(--gold);color:var(--ink);font-weight:500}
-.tab.on small{color:var(--gold)}
-.chap{display:flex;align-items:center;gap:14px;margin-top:22px}
-.badge{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;color:#3D0016;background:radial-gradient(circle at 35% 30%,#F3DDA8,#C29A57 70%);box-shadow:0 2px 6px -2px rgba(150,110,50,.6)}
-.chap b{font-size:11.5px;font-weight:500;letter-spacing:.24em;color:var(--maroon)}
-.chap span{font-size:14px;color:var(--body)}
-.chap em{margin-left:auto;font-style:normal;font-size:13px;color:var(--mut)}
+/* form */
+.form{display:flex;flex-direction:column;min-height:0;padding:14px 26px 20px}
+.head{display:flex;align-items:center;gap:18px;padding:0 4px 18px}
+.eye{display:inline-flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8A6A3A}
+[data-theme="dark"] .eye{color:#C9A46A}
+.eye b{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;letter-spacing:0;font-size:13px;font-weight:500;color:#3A2410;background:radial-gradient(120% 120% at 30% 15%,#FBEFCF,#E5C88E 42%,#BC9150 78%,#9E7438);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(150,108,48,.3),0 6px 12px -6px rgba(150,104,40,.6)}
+.head .sub{font-size:13px;color:var(--ink-2);letter-spacing:0;text-transform:none}
+.count{margin-left:auto;font-size:13px;color:var(--mut);letter-spacing:.06em}
+.count i{font-style:normal;margin:0 4px;opacity:.6}
+.cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding-bottom:18px}
 
-/* light / dark switch */
-.theme{position:relative;flex:none;display:flex;gap:2px;padding:4px;border-radius:999px;background:var(--track)}
-.theme button{position:relative;z-index:1;width:36px;height:30px;border:0;border-radius:999px;background:none;cursor:pointer;display:grid;place-items:center;color:var(--mut);transition:color .3s}
-.theme button svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
-.theme button[aria-pressed="true"]{color:var(--ink)}
-.theme i{position:absolute;top:4px;left:4px;width:36px;height:30px;border-radius:999px;background:var(--panel);box-shadow:0 1px 2px rgba(49,37,29,.16),0 4px 10px -6px rgba(49,37,29,.35);transition:transform .45s var(--ease)}
-:root[data-theme="dark"] .theme i{transform:translateX(38px)}
-.theme button:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
-html{transition:background-color .4s}
+/* the chart */
+.vis{position:relative;border-radius:24px;overflow:hidden;min-height:540px;isolation:isolate;background:var(--vis);box-shadow:inset 0 0 0 1px var(--hair)}
+.v-head{position:absolute;z-index:2;left:26px;top:22px;right:24px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;pointer-events:none}
+.v-val{margin-top:10px;display:flex;align-items:center;gap:12px}
+.v-val b{font-weight:300;font-size:40px;line-height:1;letter-spacing:-.025em;color:var(--ink)}
+.chip{height:24px;padding:0 9px;border-radius:7px;display:inline-flex;align-items:center;font-size:12px;color:#8A6A3A;background:rgba(201,160,74,.12);white-space:nowrap}
+.chip.dn{color:var(--beyond);background:color-mix(in srgb,var(--beyond) 10%,transparent)}
+.v-date{margin-top:8px;font-size:12.5px;color:var(--mut);min-height:1.2em}
+.legend{display:flex;gap:16px;font-size:11.5px;color:var(--ink-2);opacity:0;transform:translateY(-4px);transition:opacity .5s var(--soft),transform .5s var(--soft)}
+.legend.on{opacity:1;transform:none}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{width:14px;height:3px;border-radius:2px;background:var(--held)}
+.legend i.b{background:var(--beyond)}
+.vis svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.vis text{font-family:var(--f);font-feature-settings:"tnum" 1}
+.ax{font-size:10.5px;fill:var(--axis)}
+.cap-t{font-size:9.5px;letter-spacing:.2em;fill:var(--mut)}
+.fl{font-size:11px;font-weight:500}
+.foot-note{position:absolute;left:26px;bottom:16px;font-size:12px;color:var(--mut)}
 
-/* the two halves */
-.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;margin-top:18px}
-.col{min-width:0;display:flex;flex-direction:column}
-.panel{position:relative;height:clamp(320px,41vh,430px);border-radius:18px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
-.p-head{position:absolute;left:24px;top:22px;right:22px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none;z-index:1}
-.p-val{font-weight:300;font-size:38px;line-height:1;letter-spacing:-.03em;color:var(--ink)}
-.p-cap{margin-top:8px;font-size:13px;color:var(--mut)}
-.p-side{font-size:11.5px;color:var(--mut);text-align:right;line-height:1.6;white-space:nowrap}
-.p-side b{font-weight:500;color:var(--ink)}
-.p-side i{display:inline-block;width:12px;height:2px;border-radius:2px;vertical-align:middle;margin:0 6px 0 12px;background:linear-gradient(90deg,var(--gold),var(--maroon))}
-.p-side i.ds{background:repeating-linear-gradient(90deg,var(--gold) 0 3px,transparent 3px 6px)}
-.panel svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.panel text{font-family:var(--f);font-feature-settings:"tnum" 1}
-.ax{font-size:10.5px;fill:var(--faint)}
-.lab{font-size:10.5px;fill:var(--mut)}
-.lab b{font-weight:500}
-.labk{font-size:10.5px;font-weight:500;fill:var(--ink)}
+/* right column */
+.rcol{display:flex;flex-direction:column;min-height:0;padding:6px 4px 0}
+.q-t{margin:0;font-size:26px;font-weight:300;line-height:1.22;letter-spacing:-.015em;color:var(--ink);text-wrap:balance}
+.q-s{margin:10px 0 0;font-size:14px;line-height:1.5;color:var(--ink-2);max-width:48ch}
+/* the four lines: Source's pearl buttons */
+.seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:26px}
+.seg button{position:relative;height:64px;padding:0 12px;border-radius:16px;display:flex;align-items:center;gap:11px;text-align:left;color:var(--ink-2);background:var(--panel);
+  box-shadow:0 0 0 1px var(--hair),0 1px 2px rgba(49,37,29,.06);transition:color .35s,box-shadow .35s,background .35s,transform .3s var(--soft)}
+/* each icon in a coin: a soft tint at rest, the gold coin when chosen */
+.seg .coin{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--gold-d);background:rgba(201,160,74,.12);box-shadow:inset 0 0 0 1px rgba(201,160,74,.22);transition:background .45s var(--soft),box-shadow .45s var(--soft),color .45s,transform .6s var(--snap)}
+.seg button .hi{width:18px;height:18px}
+[data-theme="dark"] .seg .coin{color:#C9A46A;background:rgba(230,198,138,.08);box-shadow:inset 0 0 0 1px rgba(230,198,138,.18)}
+.seg button:hover:not(.on) .coin{background:rgba(201,160,74,.18)}
+.seg button.on .coin{color:#3A2410;background:radial-gradient(120% 120% at 30% 15%,#FBEFCF,#E5C88E 42%,#BC9150 78%,#9E7438);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 1px rgba(150,108,48,.3),0 6px 12px -6px rgba(150,104,40,.6);transform:scale(1.04)}
+.seg button span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.seg button b{font-weight:400;font-size:14px;color:inherit;white-space:nowrap}
+.seg button small{font-size:11.5px;color:var(--mut);white-space:nowrap;transition:color .35s}
+.seg button:hover:not(.on){color:var(--ink);transform:translateY(-1px);box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 18%,transparent),0 6px 14px -8px rgba(49,37,29,.3)}
+[data-theme="dark"] .seg button{background:rgba(255,255,255,.03)}
+.seg button.on{color:var(--pearl-ink);background:var(--pearl);box-shadow:var(--pearl-shadow),0 0 0 1px color-mix(in srgb,var(--acc) 30%,transparent)}
+.seg button.on b{font-weight:500}
+.seg button.on small{color:var(--ink-2)}
 
-.q{margin-top:24px}
-.q h2{margin:0;font-weight:400;font-size:22px;line-height:1.25;letter-spacing:-.01em;color:var(--ink)}
-.q p{margin:6px 0 0;font-size:13.5px;color:var(--mut)}
+.seg button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
-/* answer tiles: brand colour on the bar and the chosen border only */
-.opts{display:grid;gap:10px;margin-top:16px}
-.opts.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
-.opts.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.opt{position:relative;text-align:left;border:0;cursor:pointer;background:var(--panel);border-radius:14px;padding:16px 18px 18px;box-shadow:inset 0 0 0 1px var(--line);
-  transition:box-shadow .45s var(--ease),background .45s var(--ease)}
-.opt:hover{box-shadow:inset 0 0 0 1px var(--line2)}
-.opt:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
-.opt.sel{background:var(--selbg);box-shadow:inset 0 0 0 1px rgba(61,0,22,.42)}
-:root[data-theme="dark"] .opt.sel{box-shadow:inset 0 0 0 1px rgba(231,185,198,.45)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .opt.sel{box-shadow:inset 0 0 0 1px rgba(231,185,198,.45)}}
-.o-top{display:flex;align-items:center;gap:8px;min-height:20px}
-.o-tag{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);white-space:nowrap}
-.o-name{font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.o-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}
-.o-row .o-fig{margin-top:0}
-.mix{flex:none;font-size:11px;font-weight:500;letter-spacing:.02em;white-space:nowrap;padding:4px 9px;border-radius:999px;color:var(--maroon);background:rgba(61,0,22,.06);opacity:0;transform:translateY(3px);transition:.45s var(--ease)}
-:root[data-theme="dark"] .mix{background:rgba(231,185,198,.1)}
-.opt.sel .mix{opacity:1;transform:none}
-/* a quiet radio: a ring, and a dot that grows in when chosen */
-.tick{margin-left:auto;flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line2);transition:box-shadow .4s var(--ease)}
-.tick::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--maroon);transform:scale(0);transition:transform .45s var(--ease)}
-.opt.sel .tick{box-shadow:inset 0 0 0 1px var(--maroon)}
-.opt.sel .tick::after{transform:scale(1)}
-.o-fig{display:block;margin-top:12px;font-weight:300;font-size:28px;line-height:1;letter-spacing:-.03em;color:var(--ink);white-space:nowrap}
-.o-fig small{font-size:.5em;letter-spacing:0;margin-left:2px;color:var(--mut)}
-.o-cap{display:block;margin-top:6px;font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bar{position:relative;margin-top:12px;height:6px;border-radius:999px;background:var(--track)}
-.bar i{position:absolute;left:0;top:0;bottom:0;width:var(--w);border-radius:999px 0 0 999px;background:linear-gradient(90deg,var(--c0),var(--c1) 60%,var(--c2));transform:scaleX(0);transform-origin:left;transition:transform 1.1s var(--ease) var(--d,0s)}
-.bar i::after{content:"";position:absolute;right:-1px;top:-3px;bottom:-3px;width:2px;border-radius:1px;background:var(--c2)}
-.in .bar i{transform:scaleX(1)}
-.k0{--c0:#E9D3D9;--c1:#9E4A62;--c2:#5E0E2C}
-.k1{--c0:#F0DCCF;--c1:#B9785F;--c2:#8A4632}
-.k2{--c0:#F1E6D1;--c1:#D2B07A;--c2:#A97F3F}
-.k3{--c0:#DCE6DF;--c1:#7F9F8E;--c2:#3F6655}
+/* readings */
+.reads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.card{border-radius:18px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--hair);padding:18px 20px}
+[data-theme="dark"] .card{background:rgba(255,255,255,.025)}
+.card .big{display:block;margin-top:10px;font-weight:300;font-size:32px;line-height:1;letter-spacing:-.02em;color:var(--ink)}
+.card .big.mute{color:var(--mut)}
+.card .big small{font-size:.5em;margin-left:3px;color:var(--mut)}
+.card p{margin:8px 0 0;font-size:12.5px;color:var(--mut)}
+.card.falls{grid-column:1 / -1}
+.falls-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.falls-h .big{margin-top:0;font-size:24px}
+.falls ul{list-style:none;margin:12px 0 0;padding:0}
+.falls li{display:grid;grid-template-columns:20px 44px 1fr auto;align-items:center;gap:10px;height:34px;font-size:13px;color:var(--ink-2);border-top:1px solid var(--hair);transition:color .4s}
+.falls li .y{color:var(--mut)}
+.falls li .d{font-weight:500;color:var(--ink)}
+.mk{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--hair);transition:background .4s,box-shadow .4s}
+.mk svg{width:10px;height:10px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mk svg path{opacity:0;transform:scale(.6);transform-origin:center;transform-box:fill-box;transition:opacity .35s,transform .45s var(--snap)}
+.falls li.held .mk{box-shadow:inset 0 0 0 1px var(--held);background:color-mix(in srgb,var(--held) 14%,transparent)}
+.falls li.held .mk .ok{stroke:var(--held);opacity:1;transform:none}
+.falls li.over{color:var(--mut)}
+.falls li.over .d{color:var(--beyond)}
+.falls li.over .mk{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--beyond) 45%,transparent)}
+.falls li.over .mk .no{stroke:var(--beyond);opacity:1;transform:none}
 
-/* footer */
-.foot{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
-.why{position:relative;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;border:0;background:none;box-shadow:inset 0 0 0 1px var(--line2);font-size:13px;color:var(--body);cursor:pointer}
-.why svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:1.6}
-.why .pop{position:absolute;left:0;bottom:46px;width:300px;padding:12px 14px;border-radius:12px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line2),0 16px 32px -18px rgba(61,0,22,.4);font-size:12.5px;line-height:1.55;color:var(--body);text-align:left;opacity:0;transform:translateY(6px);pointer-events:none;transition:.35s var(--ease)}
-.why[aria-expanded="true"] .pop{opacity:1;transform:none}
-.nav{display:flex;align-items:center;gap:6px;padding:5px;border-radius:999px;background:var(--track)}
-.back{width:48px;height:48px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;background:var(--panel);box-shadow:0 1px 2px rgba(49,37,29,.14),0 6px 14px -8px rgba(49,37,29,.3)}
-.back svg,.go svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.go{height:48px;padding:0 20px 0 56px;border:0;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:40px;font-size:15px;font-weight:500;color:#fff;background:linear-gradient(180deg,#5A0A26,#3D0016);box-shadow:0 10px 22px -12px rgba(61,0,22,.7);transition:opacity .4s,transform .3s var(--ease)}
-.go:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
-.go:hover:not(:disabled){transform:translateY(-1px)}
-.go:hover:not(:disabled) svg{transform:translateX(3px)}
-.go svg{transition:transform .3s var(--ease)}
-.back:focus-visible,.go:focus-visible,.why:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
+/* foot: Source's why chip, back pearl and Continue */
+.foot{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-top:14px;border-top:1px solid var(--hair)}
+.why{flex:1 1 0%;min-width:0;display:flex;flex-direction:column-reverse;align-items:flex-start;gap:10px}
+.why-b{height:34px;padding:0 13px 0 9px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 14%,transparent);transition:.3s}
+.why-b .qi{width:16px;height:16px;color:var(--gold)}
+.why-b:hover,.why.open .why-b{color:var(--ink);box-shadow:inset 0 0 0 1px var(--gold)}
+.why-p{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s var(--soft);width:100%}
+.why-p>div{overflow:hidden}
+.why.open .why-p{grid-template-rows:1fr}
+.why-p p{margin:0 0 4px;padding-left:14px;border-left:2px solid var(--gold-l);font-size:13px;line-height:1.55;color:var(--ink-2);max-width:52ch}
+.act{display:flex;align-items:center;gap:10px}
+.back{width:52px;height:52px;border-radius:50%;color:var(--pearl-ink)}
+.pearl{width:100%;height:100%;border-radius:50%;display:grid;place-items:center;background:var(--pearl);box-shadow:var(--pearl-shadow);transition:transform .5s var(--soft)}
+.back:hover .pearl{transform:translateY(-1px)}
+.cta{height:52px;min-width:210px;border-radius:999px;display:inline-flex;align-items:stretch}
+.cta .cap{flex:1 1 0%;position:relative;display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:0 26px 0 32px;border-radius:999px;overflow:hidden;opacity:.5;
+  background:linear-gradient(#6B1734 0%,#4C0B23 52%,#3A0619 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.28),0 1px 1px rgba(61,0,22,.35),0 10px 20px -10px rgba(61,0,22,.7);transition:transform .5s var(--soft),opacity .45s}
+.cta.ready .cap{opacity:1}
+.cta .cap::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.16) 50%,transparent 70%);transform:translateX(-130%)}
+.cta.ready:hover .cap::after{animation:glint 1.2s var(--soft)}
+.cta.ready:active .cap{transform:translateY(1px) scale(.995)}
+.cta .lbl{position:relative;font-size:15px;font-weight:500;background:linear-gradient(#FFFBF4 0%,#F1DDBF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cta .cap .qi{position:relative;color:#F1DDBF;transition:transform .6s var(--soft)}
+.cta.ready:hover .cap .qi{transform:translateX(3px)}
+.cta:not(.ready){cursor:default}
+[data-theme="dark"] .cta .cap{background:linear-gradient(#F4DFAE 0%,#D9B272 55%,#B5864A 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(120,80,30,.3),0 10px 22px -10px rgba(185,134,72,.6)}
+[data-theme="dark"] .cta .lbl{background:none;color:#2A1E12}
+[data-theme="dark"] .cta .cap .qi{color:#2A1E12}
+@keyframes glint{100%{transform:translateX(130%)}}
+.back:focus-visible,.cta:focus-visible,.why-b:focus-visible,.theme button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* layout switch */
+.vsw{margin-left:auto;display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--track);box-shadow:var(--track-shadow)}
+.vsw button{height:28px;padding:0 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--mut);transition:color .3s,background .3s,box-shadow .3s}
+.vsw button small{font-size:11.5px;font-weight:400}
+.vsw button.on{color:var(--pearl-ink);background:var(--pearl);box-shadow:var(--pearl-shadow)}
+.vsw button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.vsw + .count{margin-left:14px}
+/* V1 · stacked: the chart across the top, the question and answers below */
+.frame[data-v="1"] .cols{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto}
+.frame[data-v="1"] .vis{min-height:0;height:clamp(320px,43vh,490px)}
+.frame[data-v="1"] .rcol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:auto auto 1fr;column-gap:32px;padding-top:4px}
+.frame[data-v="1"] .q-t,.frame[data-v="1"] .q-s,.frame[data-v="1"] .seg{grid-column:1}
+.frame[data-v="1"] .reads{grid-column:2;grid-row:1 / 4;margin-top:0;grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);grid-template-rows:1fr 1fr;gap:10px}
+.frame[data-v="1"] .reads .card{padding:14px 18px}
+.frame[data-v="1"] .reads .card .big{margin-top:6px;font-size:26px}
+.frame[data-v="1"] .reads .card p{margin-top:4px}
+.frame[data-v="1"] .card.falls{grid-column:2;grid-row:1 / 3}
+.frame[data-v="1"] .falls ul{margin-top:8px}
+.frame[data-v="1"] .falls li{height:27px}
+.frame[data-v="1"] .cols{gap:14px;padding-bottom:14px}
+.frame[data-v="1"] .seg{margin-top:20px}
+/* V2 · falls chart */
+.fname{font-size:11px;font-weight:500;paint-order:stroke;stroke:var(--card);stroke-width:4px;stroke-linejoin:round}
+
+/* candles grow down from the peak */
+.kd{transform-box:fill-box;transform-origin:top;animation:kd .9s var(--soft) backwards}
+@keyframes kd{from{transform:scaleY(0);opacity:0}}
 
 /* motion */
-/* candles form one after another, each growing from its open */
-.cdl{animation:form .55s var(--ease) backwards;animation-delay:calc(var(--i) * 45ms + .1s)}
-@keyframes form{from{transform:scaleY(0);opacity:0}}
-/* GPS marker: rings spread and fade; the dot pops in once its line has drawn */
-.gps .rp{animation:gps 2.4s cubic-bezier(.2,.6,.3,1) infinite;opacity:0}
+.draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 1.8s var(--soft) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.fade{animation:fade .9s .6s var(--soft) backwards}
+@keyframes fade{from{opacity:0}}
+.drop{transform-box:fill-box;transform-origin:top;animation:drop 1.2s .5s var(--soft) backwards}
+@keyframes drop{from{transform:scaleY(0)}}
+.rise{animation:rise .8s var(--soft) backwards;animation-delay:var(--d,0s)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+.gps .rp{transform-box:fill-box;transform-origin:center;animation:gps 2.4s cubic-bezier(.2,.6,.3,1) infinite;opacity:0}
 .gps .rp2{animation-delay:1.2s}
 @keyframes gps{0%{transform:scale(.8);opacity:.45}100%{transform:scale(3.4);opacity:0}}
-.gps.pop{animation:pop .7s 1.15s cubic-bezier(.34,1.56,.64,1) backwards}
+.gps.pop{transform-box:fill-box;transform-origin:center;animation:pop .7s 1.6s cubic-bezier(.34,1.56,.64,1) backwards}
 @keyframes pop{from{transform:scale(0);opacity:0}}
-.draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 1.4s var(--ease) forwards}
-@keyframes draw{to{stroke-dashoffset:0}}
-.fade{animation:fade .8s .5s var(--ease) backwards}
-@keyframes fade{from{opacity:0}}
-.rise{animation:rise .8s var(--ease) backwards;animation-delay:var(--d,0s)}
-@keyframes rise{from{opacity:0;transform:translateY(10px)}}
-.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;padding:12px 20px;border-radius:999px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line2),0 16px 32px -18px rgba(61,0,22,.4);font-size:13.5px;color:var(--ink);transition:.5s var(--ease);z-index:20}
-.toast.on{opacity:1;transform:translate(-50%,0)}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important;transition-delay:0s!important}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
 
-@media (max-width:1280px){.tab{width:auto;flex:1}.opts.c4{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:960px){
-  .shell{margin:0;border-radius:0;padding:18px 16px 20px}
-  .top{gap:16px}.wm svg{height:24px}.tabs{display:none}.theme{margin-left:auto}
-  .split{grid-template-columns:minmax(0,1fr);gap:40px}
+@media (max-width:1180px){.seg{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:1180px){.frame[data-v="1"] .rcol{grid-template-columns:minmax(0,1fr)}.frame[data-v="1"] .reads{grid-column:1;grid-row:auto;margin-top:18px;grid-template-columns:repeat(2,minmax(0,1fr))}.frame[data-v="1"] .card.falls{grid-column:1 / -1}}
+@media (max-width:900px){
+  .vsw small{display:none}
+  body{padding:10px;place-items:start center}
+  .bar{grid-template-columns:auto auto;justify-content:space-between;padding:10px 8px 0}
+  .steps{grid-area:2/1/auto/-1;gap:6px}
+  .st span{font-size:0;gap:0}.st span em{font-size:10.5px}
+  .cols{grid-template-columns:1fr}
+  .vis{min-height:0;height:min(118vw,520px)}
+  .head .sub{display:none}
 }
-@media (max-width:560px){.opts.c3{grid-template-columns:1fr}.p-side{display:none}.chap span{display:none}.go{padding-left:28px;gap:20px}}
+@media (max-width:560px){
+  .form{padding:10px 8px 14px}
+  .q-t{font-size:22px}
+  .v-val b{font-size:32px}
+  .legend{display:none}
+  .seg button{height:58px;padding:0 10px;gap:9px}
+  .seg .coin{width:30px;height:30px}
+  .foot{flex-direction:column;align-items:stretch}
+  .act{justify-content:space-between}
+  .cta{flex:1 1 0%;min-width:0}
+}
 </style>
 </head>
 <body>
-<div class="shell">
-  <header class="top">
-    <div class="wm"><svg xmlns="http://www.w3.org/2000/svg" viewBox="944.32 477.67 680.51 124.66" fill="currentColor" role="img" aria-label="WealthIQ"><path transform="matrix(1,0,0,-1,964.0862,478.17219)" d="M0 0 31.629-76.714 63.979 0 95.25-76.714 127.954 0H147.724L94.171-124.158 62.9-47.598 31.271-124.158-19.766 0Z"/><path transform="matrix(1,0,0,-1,1150.1151,551.7107)" d="M0 0C-.721 4.132-2.696 7.728-5.392 10.243-7.73 12.4-11.502 14.556-17.252 14.556-23.365 14.556-27.316 12.041-29.654 9.704-32.171 7.368-34.146 3.773-35.046 0ZM17.432-30.731C14.198-36.482 9.522-41.514 4.672-44.568-1.438-48.523-9.526-50.319-17.614-50.319-27.675-50.319-35.942-47.804-43.131-40.616-50.319-33.427-54.274-23.003-54.274-11.683-54.274 0-50.14 11.32-42.234 19.409-35.942 25.697-27.675 29.652-16.894 29.652-4.854 29.652 2.875 24.441 7.368 19.767 17.073 9.704 17.969-4.313 17.969-12.22V-14.377H-36.301C-35.942-19.769-33.608-25.878-29.833-29.652-25.699-33.786-20.669-34.505-16.356-34.505-11.502-34.505-7.909-33.427-4.313-30.731-1.258-28.395 1.079-25.339 2.696-22.463Z"/><path transform="matrix(1,0,0,-1,1200.4342,562.1348)" d="M0 0C0-13.118 8.268-24.08 21.028-24.08 32.171-24.08 42.414-15.994 42.414-.179 42.414 16.354 32.171 24.261 21.028 24.261 8.268 24.261 0 13.479 0 0M41.334 38.099H58.949V-40.196H41.334V-29.652C33.608-38.638 24.082-39.895 18.693-39.895-4.672-39.895-17.969-20.486-17.969 .36-17.969 24.98-1.076 40.076 18.873 40.076 24.444 40.076 34.146 38.638 41.334 29.293Z"/><path transform="matrix(1,0,0,-1,0,1080)" d="M1297.346 477.67H1279.735V601.828H1297.346Z"/><path transform="matrix(1,0,0,-1,1342.0105,540.2092)" d="M0 0V-62.121H-17.611V0H-28.578V16.173H-17.611V62.037H0V16.173H9.881V0Z"/><path transform="matrix(1,0,0,-1,1373.2532,478.17219)" d="M0 0H17.611V-52.333C25.158-44.605 33.425-43.887 37.918-43.887 51.757-43.887 58.045-51.075 60.204-54.13 64.875-60.96 65.055-69.765 65.055-75.157V-124.158H47.444V-76.774C47.444-72.282 47.444-67.429 44.027-63.656 42.052-61.497 38.638-59.701 34.142-59.701 28.212-59.701 23.541-62.576 21.207-65.991 18.69-69.586 17.611-75.336 17.611-85.04V-124.158H0Z"/><path transform="matrix(1,0,0,-1,0,1080)" d="M1476.939 477.67H1458.6079V601.828H1476.939Z"/><path transform="matrix(1,0,0,-1,1593.0269,570.4007)" d="M0 0C5.751 6.649 10.602 15.454 10.602 30.55 10.602 57.147-7.73 75.837-33.429 75.837-59.125 75.837-77.456 57.147-77.456 30.55-77.456 3.953-59.125-14.737-33.429-14.737-24.441-14.737-17.973-12.76-12.76-10.064L-41.155 18.15H-18.331ZM.179-22.645C-9.167-28.575-19.59-31.629-33.429-31.629-69.371-31.629-95.787-5.032-95.787 30.55-95.787 65.773-69.371 92.731-33.429 92.731 2.334 92.731 28.933 65.773 28.933 30.55 28.933 8.626 19.228-5.032 12.398-12.4L31.808-31.629H9.164Z"/></svg></div>
-    <nav class="tabs" aria-label="ASPIRE chapters">
-      <div class="tab done"><small>01</small>Arc</div>
-      <div class="tab done"><small>02</small>Source</div>
-      <div class="tab done"><small>03</small>Priorities</div>
-      <div class="tab on" aria-current="step"><small>04</small>Instinct</div>
-      <div class="tab"><small>05</small>Reach</div>
-      <div class="tab"><small>06</small>Endowment</div>
+<div class="frame" id="frame" data-v="1">
+  <header class="bar">
+    <span class="logo" aria-label="WealthIQ"><svg xmlns="http://www.w3.org/2000/svg" viewBox="944.32 477.67 680.51 124.66" fill="currentColor" aria-hidden="true"><path transform="matrix(1,0,0,-1,964.0862,478.17219)" d="M0 0 31.629-76.714 63.979 0 95.25-76.714 127.954 0H147.724L94.171-124.158 62.9-47.598 31.271-124.158-19.766 0Z"/><path transform="matrix(1,0,0,-1,1150.1151,551.7107)" d="M0 0C-.721 4.132-2.696 7.728-5.392 10.243-7.73 12.4-11.502 14.556-17.252 14.556-23.365 14.556-27.316 12.041-29.654 9.704-32.171 7.368-34.146 3.773-35.046 0ZM17.432-30.731C14.198-36.482 9.522-41.514 4.672-44.568-1.438-48.523-9.526-50.319-17.614-50.319-27.675-50.319-35.942-47.804-43.131-40.616-50.319-33.427-54.274-23.003-54.274-11.683-54.274 0-50.14 11.32-42.234 19.409-35.942 25.697-27.675 29.652-16.894 29.652-4.854 29.652 2.875 24.441 7.368 19.767 17.073 9.704 17.969-4.313 17.969-12.22V-14.377H-36.301C-35.942-19.769-33.608-25.878-29.833-29.652-25.699-33.786-20.669-34.505-16.356-34.505-11.502-34.505-7.909-33.427-4.313-30.731-1.258-28.395 1.079-25.339 2.696-22.463Z"/><path transform="matrix(1,0,0,-1,1200.4342,562.1348)" d="M0 0C0-13.118 8.268-24.08 21.028-24.08 32.171-24.08 42.414-15.994 42.414-.179 42.414 16.354 32.171 24.261 21.028 24.261 8.268 24.261 0 13.479 0 0M41.334 38.099H58.949V-40.196H41.334V-29.652C33.608-38.638 24.082-39.895 18.693-39.895-4.672-39.895-17.969-20.486-17.969 .36-17.969 24.98-1.076 40.076 18.873 40.076 24.444 40.076 34.146 38.638 41.334 29.293Z"/><path transform="matrix(1,0,0,-1,0,1080)" d="M1297.346 477.67H1279.735V601.828H1297.346Z"/><path transform="matrix(1,0,0,-1,1342.0105,540.2092)" d="M0 0V-62.121H-17.611V0H-28.578V16.173H-17.611V62.037H0V16.173H9.881V0Z"/><path transform="matrix(1,0,0,-1,1373.2532,478.17219)" d="M0 0H17.611V-52.333C25.158-44.605 33.425-43.887 37.918-43.887 51.757-43.887 58.045-51.075 60.204-54.13 64.875-60.96 65.055-69.765 65.055-75.157V-124.158H47.444V-76.774C47.444-72.282 47.444-67.429 44.027-63.656 42.052-61.497 38.638-59.701 34.142-59.701 28.212-59.701 23.541-62.576 21.207-65.991 18.69-69.586 17.611-75.336 17.611-85.04V-124.158H0Z"/><path transform="matrix(1,0,0,-1,0,1080)" d="M1476.939 477.67H1458.6079V601.828H1476.939Z"/><path transform="matrix(1,0,0,-1,1593.0269,570.4007)" d="M0 0C5.751 6.649 10.602 15.454 10.602 30.55 10.602 57.147-7.73 75.837-33.429 75.837-59.125 75.837-77.456 57.147-77.456 30.55-77.456 3.953-59.125-14.737-33.429-14.737-24.441-14.737-17.973-12.76-12.76-10.064L-41.155 18.15H-18.331ZM.179-22.645C-9.167-28.575-19.59-31.629-33.429-31.629-69.371-31.629-95.787-5.032-95.787 30.55-95.787 65.773-69.371 92.731-33.429 92.731 2.334 92.731 28.933 65.773 28.933 30.55 28.933 8.626 19.228-5.032 12.398-12.4L31.808-31.629H9.164Z"/></svg></span>
+    <nav class="steps" aria-label="ASPIRE chapters">
+      <div class="st done"><i></i><span><em>01</em>Arc</span></div>
+      <div class="st done"><i></i><span><em>02</em>Source</span></div>
+      <div class="st done"><i></i><span><em>03</em>Priorities</span></div>
+      <div class="st now" aria-current="step"><i></i><span><em>04</em>Instinct</span></div>
+      <div class="st"><i></i><span><em>05</em>Reach</span></div>
+      <div class="st"><i></i><span><em>06</em>Endowment</span></div>
     </nav>
-    <div class="theme" role="group" aria-label="Theme"><i aria-hidden="true"></i>
-      <button type="button" data-t="light" aria-label="Light mode"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg></button>
-      <button type="button" data-t="dark" aria-label="Dark mode"><svg viewBox="0 0 16 16"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button>
+    <div class="theme" role="group" aria-label="Theme">
+      <button type="button" data-t="light" aria-label="Light mode"><svg class="qi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></button>
+      <button type="button" data-t="dark" aria-label="Dark mode"><svg class="qi" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg></button>
     </div>
   </header>
-  <div class="chap"><span class="badge">I</span><b>INSTINCT</b><span>How you act when markets move.</span><em>04 / 06</em></div>
 
-  <main class="split">
-    <section class="col" aria-labelledby="q1">
-      <div class="panel" id="pL">
-        <div class="p-head"><div><div class="p-val" id="vL">—</div><div class="p-cap" id="cL"></div></div><div class="p-side" id="sL"></div></div>
-        <svg id="gL" role="img"></svg>
-      </div>
-      <div class="q"><h2 id="q1">How much of a fall could you sit through?</h2><p>Five Nifty 50 falls since 2000. Pick the ride you’d accept.</p></div>
-      <div class="opts c4" id="oL"></div>
-    </section>
-
-    <section class="col" aria-labelledby="q2">
-      <div class="panel" id="pR">
-        <div class="p-head"><div><div class="p-val" id="vR">—</div><div class="p-cap" id="cR"></div></div><div class="p-side" id="sR"></div></div>
-        <svg id="gR" role="img"></svg>
-      </div>
-      <div class="q"><h2 id="q2">Two more flat years. What would you do?</h2><p>The Nifty 50 is still below its September 2024 high.</p></div>
-      <div class="opts c3" id="oR"></div>
-    </section>
-  </main>
-
-  <footer class="foot">
-    <button class="why" id="why" type="button" aria-expanded="false"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 4.8v.1"/></svg>Why we ask<span class="pop" role="tooltip">How you felt through real falls says more than a risk score. We use it to set how much of your plan sits in equity.</span></button>
-    <div class="nav">
-      <button class="back" type="button" aria-label="Back to Priorities"><svg viewBox="0 0 16 16"><path d="M13 8H3M7 4L3 8l4 4"/></svg></button>
-      <button class="go" id="go" type="button" disabled>Continue <svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
+  <main class="form">
+    <div class="head">
+      <span class="eye"><b>I</b>Instinct</span>
+      <span class="sub">How you respond when markets turn.</span>
+      <div class="vsw" role="tablist" aria-label="Layout"><button type="button" role="tab" data-v="1">V1<small>Stacked</small></button><button type="button" role="tab" data-v="2">V2<small>Split</small></button></div>
+      <span class="count num">04<i>/</i>06</span>
     </div>
-  </footer>
+
+    <div class="cols">
+      <section class="vis" id="vis" aria-label="Nifty 50 since 2000">
+        <div class="v-head">
+          <div>
+            <div class="caps" id="vcap">Nifty 50 · since 2000</div>
+            <div class="v-val"><b class="num" id="val">—</b><span class="chip num" id="chip"></span></div>
+            <div class="v-date" id="vdate"></div>
+          </div>
+          <div class="legend" id="legend"><span><i></i>Within your line</span><span><i class="b"></i>Beyond it</span></div>
+        </div>
+        <svg id="g" role="img"></svg>
+      </section>
+
+      <section class="rcol" aria-labelledby="qt">
+        <h1 class="q-t rise" id="qt">How deep a fall could you sit through?</h1>
+        <p class="q-s rise" style="--d:.06s">The Nifty 50 has fallen sharply five times since 2000. Set the line you’d hold without selling.</p>
+        <div class="seg rise" style="--d:.12s" id="seg" role="radiogroup" aria-label="Your turbulence line"></div>
+        <div class="reads rise" style="--d:.18s">
+          <div class="card"><div class="caps">On ₹10 Cr</div><b class="big num mute" id="rA">—</b><p>at the deepest point</p></div>
+          <div class="card"><div class="caps">To get back</div><b class="big num mute" id="rB">—</b><p>to ₹10 Cr</p></div>
+          <div class="card falls"><div class="falls-h"><div class="caps">Falls you’d have held</div><b class="big num mute" id="rC">—</b></div><ul id="fl"></ul></div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="foot">
+      <div class="why" id="why">
+        <button type="button" class="why-b" aria-expanded="false" aria-controls="whyp"><svg class="qi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/></svg>Why we ask</button>
+        <div class="why-p" id="whyp"><div><p>Every portfolio falls at some point. The line you set decides how much of your plan sits in equity, so a real fall never pushes you to sell.</p></div></div>
+      </div>
+      <div class="act">
+        <button type="button" class="back" aria-label="Back to Priorities"><span class="pearl"><svg class="qi" viewBox="0 0 24 24"><path d="M19 12H5.5M11 6l-6 6 6 6"/></svg></span></button>
+        <button type="button" class="cta" id="go" aria-disabled="true"><span class="cap"><span class="lbl">Continue</span><svg class="qi" viewBox="0 0 24 24"><path d="M5 12h13.5M13 6l6 6-6 6"/></svg></span></button>
+      </div>
+    </footer>
+  </main>
 </div>
-<div class="toast" id="toast" role="status"></div>
 
 <script>
 const NIFTY_V2=[[2000.016,1613],[2000.036,1623],[2000.055,1621],[2000.074,1599],[2000.093,1600],[2000.112,1756],[2000.131,1718],[2000.151,1710],[2000.17,1656],[2000.189,1603],[2000.205,1562],[2000.227,1570],[2000.246,1528],[2000.266,1557],[2000.282,1519],[2000.301,1416],[2000.323,1407],[2000.342,1422],[2000.361,1283],[2000.381,1268],[2000.4,1275],[2000.419,1389],[2000.438,1467],[2000.457,1477],[2000.476,1472],[2000.496,1471],[2000.515,1518],[2000.534,1510],[2000.553,1397],[2000.572,1334],[2000.591,1319],[2000.611,1311],[2000.63,1358],[2000.649,1381],[2000.665,1394],[2000.687,1450],[2000.706,1417],[2000.726,1266],[2000.745,1272],[2000.764,1285],[2000.783,1177],[2000.802,1172],[2000.821,1179],[2000.841,1242],[2000.86,1240],[2000.879,1236],[2000.898,1225],[2000.917,1276],[2000.936,1314],[2000.956,1313],[2000.975,1242],[2000.994,1264],[2001.011,1327],[2001.03,1287],[2001.049,1329],[2001.066,1370],[2001.088,1379],[2001.107,1406],[2001.126,1381],[2001.145,1320],[2001.164,1306],[2001.183,1255],[2001.203,1194],[2001.222,1161],[2001.241,1148],[2001.26,1140],[2001.277,1025],[2001.298,1144],[2001.318,1101],[2001.337,1130],[2001.356,1140],[2001.375,1173],[2001.394,1175],[2001.413,1148],[2001.433,1127],[2001.452,1088],[2001.471,1088],[2001.49,1108],[2001.509,1065],[2001.528,1110],[2001.548,1078],[2001.567,1052],[2001.586,1075],[2001.605,1071],[2001.624,1069],[2001.643,1069],[2001.663,1054],[2001.682,1035],[2001.701,920],[2001.72,854],[2001.739,914],[2001.758,915],[2001.778,960],[2001.797,977],[2001.813,983],[2001.835,998],[2001.854,1004],[2001.871,1036],[2001.893,1059],[2001.909,1067],[2001.931,1112],[2001.95,1088],[2001.969,1051],[2001.988,1034],[2002.008,1096],[2002.027,1089],[2002.047,1093],[2002.066,1080],[2002.085,1082],[2002.104,1124],[2002.123,1160],[2002.142,1164],[2002.162,1178],[2002.181,1188],[2002.2,1170],[2002.219,1138],[2002.235,1130],[2002.257,1142],[2002.277,1146],[2002.296,1100],[2002.315,1097],[2002.334,1097],[2002.353,1116],[2002.372,1091],[2002.392,1067],[2002.411,1029],[2002.43,1049],[2002.449,1086],[2002.468,1063],[2002.487,1058],[2002.507,1074],[2002.526,1058],[2002.545,1036],[2002.564,974],[2002.583,955],[2002.602,962],[2002.621,979],[2002.641,995],[2002.66,1011],[2002.679,995],[2002.698,992],[2002.717,970],[2002.736,976],[2002.756,948],[2002.775,971],[2002.794,972],[2002.813,932],[2002.832,951],[2002.851,957],[2002.871,990],[2002.89,1020],[2002.909,1050],[2002.928,1070],[2002.947,1086],[2002.966,1079],[2002.986,1098],[2003.005,1090],[2003.025,1080],[2003.044,1086],[2003.063,1056],[2003.082,1042],[2003.101,1058],[2003.12,1036],[2003.14,1066],[2003.159,1063],[2003.178,1017],[2003.194,1000],[2003.219,1037],[2003.235,1001],[2003.255,1017],[2003.274,950],[2003.29,941],[2003.312,924],[2003.331,938],[2003.35,938],[2003.37,973],[2003.389,968],[2003.408,1007],[2003.427,1046],[2003.446,1056],[2003.465,1100],[2003.485,1126],[2003.504,1138],[2003.523,1162],[2003.542,1140],[2003.561,1163],[2003.58,1196],[2003.6,1223],[2003.616,1248],[2003.638,1311],[2003.657,1357],[2003.676,1398],[2003.695,1372],[2003.715,1322],[2003.734,1387],[2003.753,1449],[2003.772,1523],[2003.791,1569],[2003.813,1522],[2003.83,1556],[2003.849,1592],[2003.871,1563],[2003.887,1541],[2003.906,1615],[2003.925,1646],[2003.945,1699],[2003.961,1756],[2003.964,1779],[2003.983,1837],[2004.003,1946],[2004.022,1972],[2004.036,1982],[2004.041,1901],[2004.06,1848],[2004.079,1810],[2004.099,1834],[2004.118,1914],[2004.137,1853],[2004.156,1800],[2004.175,1868],[2004.194,1812],[2004.214,1725],[2004.233,1748],[2004.252,1841],[2004.268,1854],[2004.293,1868],[2004.309,1892],[2004.329,1796],[2004.348,1804],[2004.367,1582],[2004.375,1389],[2004.386,1560],[2004.405,1509],[2004.424,1521],[2004.444,1508],[2004.463,1491],[2004.482,1488],[2004.501,1538],[2004.52,1553],[2004.539,1559],[2004.559,1602],[2004.578,1632],[2004.597,1633],[2004.616,1598],[2004.635,1590],[2004.654,1609],[2004.674,1634],[2004.693,1669],[2004.712,1734],[2004.731,1722],[2004.75,1775],[2004.772,1818],[2004.789,1795],[2004.805,1780],[2004.827,1787],[2004.846,1852],[2004.865,1873],[2004.884,1872],[2004.901,1901],[2004.92,1999],[2004.923,1996],[2004.942,1969],[2004.961,2012],[2004.98,2063],[2004.999,2080],[2005.016,2016],[2005.036,1931],[2005.052,1925],[2005.074,2008],[2005.093,2078],[2005.112,2082],[2005.131,2056],[2005.151,2061],[2005.17,2148],[2005.189,2154],[2005.208,2109],[2005.225,2015],[2005.246,2068],[2005.266,2031],[2005.285,1956],[2005.304,1967],[2005.323,1902],[2005.342,1978],[2005.361,1988],[2005.381,1992],[2005.4,2076],[2005.422,2092],[2005.438,2091],[2005.457,2123],[2005.476,2194],[2005.496,2212],[2005.515,2196],[2005.534,2213],[2005.553,2266],[2005.572,2312],[2005.591,2361],[2005.611,2362],[2005.63,2383],[2005.649,2357],[2005.668,2416],[2005.687,2455],[2005.706,2552],[2005.726,2478],[2005.745,2601],[2005.764,2574],[2005.783,2484],[2005.802,2444],[2005.821,2316],[2005.835,2419],[2005.86,2549],[2005.879,2620],[2005.901,2683],[2005.917,2698],[2005.936,2756],[2005.956,2810],[2005.975,2805],[2005.994,2837],[2006.014,2914],[2006.033,2851],[2006.052,2901],[2006.071,2983],[2006.09,2941],[2006.11,3028],[2006.129,2982],[2006.148,3050],[2006.167,3147],[2006.186,3184],[2006.205,3234],[2006.225,3280],[2006.244,3403],[2006.263,3455],[2006.279,3346],[2006.301,3573],[2006.323,3558],[2006.339,3664],[2006.353,3754],[2006.359,3650],[2006.378,3247],[2006.397,3210],[2006.416,3091],[2006.435,2866],[2006.449,2633],[2006.454,2890],[2006.479,3050],[2006.493,3128],[2006.512,3076],[2006.531,3123],[2006.55,2945],[2006.569,3131],[2006.589,3177],[2006.608,3274],[2006.627,3357],[2006.646,3386],[2006.665,3435],[2006.684,3471],[2006.704,3479],[2006.723,3544],[2006.742,3588],[2006.761,3570],[2006.78,3676],[2006.802,3684],[2006.819,3739],[2006.827,3769],[2006.838,3805],[2006.857,3835],[2006.876,3853],[2006.895,3951],[2006.914,3998],[2006.934,3962],[2006.953,3889],[2006.972,3871],[2006.991,3966],[2007.011,3983],[2007.03,4052],[2007.049,4090],[2007.066,4148],[2007.088,4184],[2007.101,4224],[2007.107,4187],[2007.123,4146],[2007.145,3939],[2007.164,3727],[2007.172,3576],[2007.183,3718],[2007.203,3609],[2007.222,3861],[2007.241,3822],[2007.257,3752],[2007.279,3917],[2007.298,4084],[2007.318,4084],[2007.337,4117],[2007.356,4077],[2007.375,4214],[2007.383,4261],[2007.394,4248],[2007.413,4297],[2007.433,4145],[2007.452,4171],[2007.471,4252],[2007.49,4318],[2007.509,4385],[2007.528,4505],[2007.548,4566],[2007.567,4445],[2007.586,4402],[2007.605,4333],[2007.624,4108],[2007.643,4190],[2007.663,4464],[2007.682,4510],[2007.701,4518],[2007.72,4838],[2007.739,5021],[2007.758,5186],[2007.778,5428],[2007.797,5215],[2007.816,5702],[2007.835,5932],[2007.854,5663],[2007.873,5907],[2007.893,5609],[2007.912,5763],[2007.931,5974],[2007.95,6048],[2007.966,5766],[2007.988,6080],[2008.008,6274],[2008.019,6288],[2008.027,6200],[2008.047,5705],[2008.066,5383],[2008.085,5317],[2008.104,5120],[2008.123,5303],[2008.142,5111],[2008.162,5224],[2008.181,4772],[2008.2,4746],[2008.214,4574],[2008.238,4942],[2008.257,4647],[2008.277,4778],[2008.293,4958],[2008.315,5112],[2008.334,5228],[2008.353,4983],[2008.372,5158],[2008.392,4947],[2008.411,4870],[2008.43,4628],[2008.449,4517],[2008.468,4348],[2008.487,4137],[2008.507,4016],[2008.526,4049],[2008.545,4092],[2008.564,4312],[2008.583,4414],[2008.602,4530],[2008.619,4431],[2008.641,4327],[2008.66,4360],[2008.679,4352],[2008.698,4228],[2008.717,4245],[2008.736,3985],[2008.756,3818],[2008.775,3280],[2008.794,3074],[2008.813,2584],[2008.821,2524],[2008.832,2886],[2008.851,2973],[2008.871,2810],[2008.89,2693],[2008.909,2755],[2008.928,2714],[2008.947,2921],[2008.966,3078],[2008.986,2857],[2009.003,3047],[2009.022,2873],[2009.041,2828],[2009.06,2679],[2009.079,2875],[2009.099,2843],[2009.118,2948],[2009.137,2736],[2009.156,2764],[2009.175,2620],[2009.194,2719],[2009.214,2807],[2009.233,3109],[2009.249,3211],[2009.268,3342],[2009.29,3384],[2009.309,3481],[2009.323,3474],[2009.348,3621],[2009.367,3672],[2009.386,4238],[2009.405,4449],[2009.424,4587],[2009.444,4583],[2009.463,4314],[2009.482,4376],[2009.501,4424],[2009.52,4004],[2009.539,4375],[2009.559,4569],[2009.578,4636],[2009.597,4481],[2009.616,4580],[2009.635,4529],[2009.654,4732],[2009.674,4680],[2009.693,4830],[2009.712,4976],[2009.731,4959],[2009.747,5083],[2009.769,4945],[2009.791,5142],[2009.808,4997],[2009.827,4712],[2009.846,4796],[2009.865,4999],[2009.884,5052],[2009.903,4942],[2009.923,5109],[2009.942,5117],[2009.961,4988],[2009.977,5178],[2009.997,5201],[2010.019,5245],[2010.038,5252],[2010.057,5036],[2010.077,4882],[2010.099,4757],[2010.112,4827],[2010.134,4845],[2010.153,4922],[2010.172,5089],[2010.192,5137],[2010.211,5263],[2010.23,5282],[2010.246,5290],[2010.268,5362],[2010.287,5263],[2010.307,5304],[2010.326,5278],[2010.345,5018],[2010.364,5094],[2010.383,4931],[2010.402,5067],[2010.422,5136],[2010.441,5119],[2010.46,5263],[2010.479,5269],[2010.498,5237],[2010.517,5352],[2010.537,5394],[2010.556,5449],[2010.575,5368],[2010.594,5439],[2010.613,5452],[2010.632,5531],[2010.652,5409],[2010.671,5479],[2010.687,5640],[2010.709,5885],[2010.728,6018],[2010.747,6143],[2010.767,6103],[2010.786,6063],[2010.805,6066],[2010.824,6018],[2010.843,6312],[2010.862,6072],[2010.882,5890],[2010.901,5752],[2010.92,5993],[2010.939,5857],[2010.956,5949],[2010.977,6012],[2010.997,6134],[2011.016,5905],[2011.036,5655],[2011.055,5696],[2011.074,5512],[2011.093,5396],[2011.112,5310],[2011.131,5459],[2011.151,5304],[2011.17,5539],[2011.189,5445],[2011.208,5374],[2011.227,5654],[2011.246,5826],[2011.266,5842],[2011.285,5825],[2011.301,5885],[2011.323,5750],[2011.342,5551],[2011.361,5545],[2011.381,5486],[2011.4,5476],[2011.419,5517],[2011.438,5486],[2011.457,5366],[2011.476,5471],[2011.496,5627],[2011.515,5661],[2011.534,5581],[2011.553,5634],[2011.572,5482],[2011.591,5211],[2011.611,5073],[2011.63,4846],[2011.649,4748],[2011.668,5040],[2011.687,5059],[2011.706,5084],[2011.726,4868],[2011.745,4943],[2011.764,4888],[2011.783,5132],[2011.802,5050],[2011.821,5361],[2011.841,5284],[2011.86,5169],[2011.879,4906],[2011.898,4710],[2011.917,5050],[2011.936,4867],[2011.956,4652],[2011.966,4544],[2011.975,4714],[2011.994,4624],[2012.016,4747],[2012.033,4866],[2012.052,5049],[2012.071,5205],[2012.09,5326],[2012.11,5382],[2012.129,5564],[2012.148,5429],[2012.17,5359],[2012.186,5334],[2012.205,5318],[2012.225,5278],[2012.244,5296],[2012.257,5323],[2012.282,5207],[2012.301,5291],[2012.32,5191],[2012.339,5087],[2012.359,4929],[2012.378,4891],[2012.397,4920],[2012.416,4842],[2012.435,5068],[2012.454,5139],[2012.474,5146],[2012.493,5279],[2012.512,5317],[2012.531,5227],[2012.55,5205],[2012.569,5100],[2012.589,5216],[2012.608,5320],[2012.627,5366],[2012.646,5387],[2012.665,5258],[2012.687,5359],[2012.704,5578],[2012.723,5691],[2012.742,5703],[2012.761,5747],[2012.78,5676],[2012.799,5684],[2012.819,5664],[2012.838,5698],[2012.857,5686],[2012.876,5574],[2012.895,5627],[2012.914,5880],[2012.934,5907],[2012.953,5880],[2012.972,5848],[2012.991,5908],[2013.008,6016],[2013.027,5951],[2013.047,6064],[2013.066,6075],[2013.085,5999],[2013.104,5904],[2013.123,5887],[2013.142,5850],[2013.162,5720],[2013.181,5946],[2013.2,5873],[2013.219,5651],[2013.235,5683],[2013.257,5553],[2013.277,5529],[2013.293,5783],[2013.315,5871],[2013.334,5944],[2013.356,6107],[2013.372,6187],[2013.392,5984],[2013.411,5986],[2013.43,5881],[2013.449,5808],[2013.468,5668],[2013.487,5842],[2013.507,5868],[2013.526,6009],[2013.545,6029],[2013.564,5886],[2013.583,5678],[2013.6,5566],[2013.621,5508],[2013.641,5472],[2013.66,5472],[2013.679,5680],[2013.698,5851],[2013.717,6012],[2013.736,5833],[2013.756,5907],[2013.775,6096],[2013.794,6189],[2013.813,6145],[2013.838,6325],[2013.851,6141],[2013.868,6056],[2013.89,5995],[2013.909,6176],[2013.928,6260],[2013.947,6168],[2013.966,6274],[2013.986,6314],[2014.005,6211],[2014.025,6171],[2014.044,6262],[2014.063,6267],[2014.082,6090],[2014.101,6063],[2014.12,6048],[2014.14,6155],[2014.159,6277],[2014.178,6527],[2014.197,6504],[2014.219,6495],[2014.235,6696],[2014.255,6694],[2014.274,6776],[2014.29,6779],[2014.312,6783],[2014.331,6695],[2014.35,6859],[2014.37,7203],[2014.389,7367],[2014.408,7230],[2014.427,7583],[2014.446,7542],[2014.465,7511],[2014.485,7509],[2014.504,7752],[2014.523,7460],[2014.542,7664],[2014.561,7790],[2014.58,7603],[2014.6,7569],[2014.616,7792],[2014.638,7913],[2014.654,7954],[2014.676,8087],[2014.695,8106],[2014.715,8121],[2014.734,7969],[2014.747,7946],[2014.772,7860],[2014.791,7780],[2014.808,8015],[2014.83,8322],[2014.849,8337],[2014.868,8390],[2014.887,8477],[2014.906,8588],[2014.925,8538],[2014.945,8224],[2014.964,8225],[2014.983,8201],[2015.003,8395],[2015.022,8284],[2015.041,8514],[2015.06,8836],[2015.079,8809],[2015.099,8661],[2015.118,8806],[2015.137,8834],[2015.159,8902],[2015.167,8996],[2015.172,8938],[2015.194,8648],[2015.214,8571],[2015.233,8341],[2015.246,8586],[2015.271,8780],[2015.29,8606],[2015.309,8305],[2015.326,8182],[2015.348,8192],[2015.367,8262],[2015.386,8459],[2015.405,8434],[2015.424,8115],[2015.444,7983],[2015.463,8225],[2015.482,8381],[2015.501,8485],[2015.52,8361],[2015.539,8610],[2015.559,8522],[2015.578,8533],[2015.597,8565],[2015.616,8519],[2015.635,8300],[2015.654,8002],[2015.674,7655],[2015.693,7789],[2015.712,7982],[2015.728,7868],[2015.747,7951],[2015.769,8190],[2015.789,8238],[2015.808,8295],[2015.827,8066],[2015.846,7954],[2015.865,7762],[2015.884,7857],[2015.903,7943],[2015.923,7782],[2015.942,7610],[2015.961,7762],[2015.977,7861],[2016.0,7963],[2016.019,7601],[2016.038,7438],[2016.057,7422],[2016.077,7564],[2016.096,7489],[2016.115,6981],[2016.134,7211],[2016.151,6971],[2016.153,7030],[2016.172,7485],[2016.192,7510],[2016.211,7604],[2016.225,7716],[2016.249,7713],[2016.268,7555],[2016.282,7850],[2016.307,7899],[2016.326,7850],[2016.345,7733],[2016.364,7815],[2016.383,7750],[2016.402,8157],[2016.422,8221],[2016.441,8170],[2016.46,8170],[2016.479,8089],[2016.498,8328],[2016.517,8323],[2016.537,8541],[2016.556,8541],[2016.575,8638],[2016.594,8683],[2016.613,8672],[2016.632,8667],[2016.652,8573],[2016.671,8810],[2016.69,8867],[2016.709,8780],[2016.728,8832],[2016.747,8611],[2016.767,8698],[2016.786,8583],[2016.805,8693],[2016.83,8626],[2016.843,8434],[2016.862,8296],[2016.882,8074],[2016.901,8114],[2016.92,8087],[2016.939,8262],[2016.958,8139],[2016.977,7986],[2016.997,8186],[2017.014,8244],[2017.033,8400],[2017.052,8349],[2017.071,8641],[2017.09,8741],[2017.11,8794],[2017.129,8822],[2017.145,8940],[2017.167,8898],[2017.186,8935],[2017.197,9087],[2017.205,9160],[2017.225,9108],[2017.244,9174],[2017.263,9198],[2017.279,9151],[2017.301,9119],[2017.32,9304],[2017.339,9285],[2017.359,9401],[2017.378,9428],[2017.397,9595],[2017.416,9654],[2017.435,9668],[2017.454,9588],[2017.474,9575],[2017.493,9521],[2017.512,9666],[2017.531,9886],[2017.55,9915],[2017.569,10014],[2017.589,10066],[2017.608,9711],[2017.627,9837],[2017.643,9857],[2017.665,9974],[2017.684,9935],[2017.704,10085],[2017.723,9964],[2017.742,9789],[2017.761,9980],[2017.78,10167],[2017.797,10147],[2017.819,10323],[2017.838,10452],[2017.857,10322],[2017.876,10284],[2017.895,10390],[2017.914,10122],[2017.934,10266],[2017.953,10333],[2017.972,10493],[2017.991,10531],[2018.011,10559],[2018.03,10681],[2018.049,10895],[2018.066,11070],[2018.088,10761],[2018.107,10455],[2018.126,10452],[2018.145,10491],[2018.162,10458],[2018.183,10227],[2018.203,10195],[2018.222,9998],[2018.235,10114],[2018.26,10332],[2018.279,10481],[2018.298,10564],[2018.318,10692],[2018.337,10618],[2018.356,10806],[2018.375,10596],[2018.394,10605],[2018.413,10696],[2018.433,10768],[2018.452,10818],[2018.471,10822],[2018.49,10714],[2018.509,10773],[2018.528,11019],[2018.548,11010],[2018.567,11278],[2018.586,11361],[2018.605,11430],[2018.624,11471],[2018.643,11557],[2018.663,11680],[2018.682,11589],[2018.701,11515],[2018.72,11143],[2018.739,10930],[2018.758,10316],[2018.778,10472],[2018.797,10304],[2018.816,10030],[2018.835,10553],[2018.854,10585],[2018.873,10682],[2018.89,10527],[2018.912,10877],[2018.931,10694],[2018.95,10805],[2018.969,10754],[2018.988,10860],[2019.008,10727],[2019.027,10795],[2019.047,10907],[2019.066,10781],[2019.085,10894],[2019.104,10944],[2019.123,10724],[2019.142,10792],[2019.162,10864],[2019.181,11035],[2019.2,11427],[2019.219,11457],[2019.238,11624],[2019.257,11666],[2019.277,11643],[2019.293,11753],[2019.315,11755],[2019.334,11712],[2019.353,11279],[2019.372,11407],[2019.392,11844],[2019.411,11923],[2019.43,11871],[2019.449,11823],[2019.468,11724],[2019.487,11789],[2019.507,11811],[2019.526,11552],[2019.545,11419],[2019.564,11284],[2019.583,10997],[2019.602,11110],[2019.621,11048],[2019.641,10829],[2019.66,11023],[2019.679,10946],[2019.698,11076],[2019.717,11274],[2019.736,11512],[2019.756,11175],[2019.775,11305],[2019.794,11662],[2019.819,11627],[2019.832,11891],[2019.851,11908],[2019.871,11895],[2019.89,11914],[2019.909,12056],[2019.928,11922],[2019.947,12087],[2019.966,12272],[2019.986,12246],[2020.005,12227],[2020.025,12257],[2020.036,12362],[2020.044,12352],[2020.063,12248],[2020.085,11662],[2020.101,12098],[2020.12,12113],[2020.14,12081],[2020.159,11202],[2020.178,10989],[2020.197,9955],[2020.216,8745],[2020.225,7610],[2020.235,8660],[2020.255,8084],[2020.274,9112],[2020.293,9267],[2020.312,9154],[2020.331,9860],[2020.35,9252],[2020.37,9137],[2020.389,9039],[2020.408,9580],[2020.427,10142],[2020.446,9973],[2020.465,10244],[2020.485,10383],[2020.504,10607],[2020.523,10768],[2020.542,10902],[2020.561,11194],[2020.58,11073],[2020.6,11214],[2020.619,11178],[2020.638,11372],[2020.657,11648],[2020.676,11334],[2020.695,11464],[2020.715,11505],[2020.734,11050],[2020.753,11417],[2020.772,11914],[2020.791,11762],[2020.81,11930],[2020.83,11642],[2020.849,12264],[2020.857,12461],[2020.868,12780],[2020.887,12859],[2020.906,12969],[2020.925,13259],[2020.945,13514],[2020.964,13761],[2020.983,13749],[2021.0,14018],[2021.019,14347],[2021.038,14434],[2021.057,14372],[2021.077,13635],[2021.096,14924],[2021.115,15163],[2021.134,14982],[2021.153,14529],[2021.172,14938],[2021.192,15031],[2021.211,14744],[2021.23,14507],[2021.249,14867],[2021.268,14835],[2021.287,14618],[2021.307,14341],[2021.326,14631],[2021.345,14823],[2021.364,14678],[2021.383,15175],[2021.402,15436],[2021.422,15670],[2021.441,15799],[2021.46,15683],[2021.479,15860],[2021.498,15722],[2021.517,15690],[2021.537,15923],[2021.556,15856],[2021.575,15763],[2021.594,16238],[2021.613,16529],[2021.632,16450],[2021.652,16705],[2021.671,17324],[2021.69,17369],[2021.709,17585],[2021.728,17853],[2021.747,17532],[2021.767,17895],[2021.786,18339],[2021.794,18477],[2021.805,18115],[2021.824,17672],[2021.843,17917],[2021.862,18103],[2021.882,17765],[2021.901,17026],[2021.92,17197],[2021.939,17511],[2021.958,16985],[2021.977,17004],[2021.997,17354],[2022.016,17813],[2022.036,18256],[2022.055,17617],[2022.074,17102],[2022.093,17516],[2022.112,17375],[2022.131,17276],[2022.151,16658],[2022.17,16245],[2022.189,16630],[2022.208,17287],[2022.227,17153],[2022.246,17670],[2022.266,17784],[2022.285,17476],[2022.304,17172],[2022.323,17103],[2022.342,16411],[2022.361,15782],[2022.381,16266],[2022.4,16352],[2022.419,16584],[2022.438,16202],[2022.457,15294],[2022.476,15699],[2022.496,15752],[2022.515,16221],[2022.534,16049],[2022.553,16719],[2022.572,17158],[2022.591,17398],[2022.611,17698],[2022.63,17758],[2022.649,17559],[2022.668,17539],[2022.687,17833],[2022.706,17531],[2022.726,17327],[2022.745,17094],[2022.764,17315],[2022.783,17186],[2022.802,17576],[2022.821,17787],[2022.841,18117],[2022.86,18350],[2022.879,18308],[2022.895,18484],[2022.898,18513],[2022.917,18696],[2022.936,18497],[2022.956,18269],[2022.975,17807],[2022.994,18105],[2023.014,17859],[2023.033,17957],[2023.052,18028],[2023.071,17604],[2023.09,17854],[2023.11,17856],[2023.129,17944],[2023.148,17466],[2023.167,17594],[2023.186,17413],[2023.205,17100],[2023.225,16945],[2023.244,17360],[2023.263,17599],[2023.282,17828],[2023.301,17624],[2023.32,18065],[2023.339,18069],[2023.359,18315],[2023.378,18203],[2023.397,18499],[2023.416,18534],[2023.435,18563],[2023.454,18826],[2023.474,18666],[2023.493,19189],[2023.512,19332],[2023.531,19564],[2023.55,19745],[2023.569,19646],[2023.589,19517],[2023.608,19428],[2023.627,19310],[2023.646,19266],[2023.665,19435],[2023.684,19820],[2023.704,20192],[2023.723,19674],[2023.742,19638],[2023.761,19654],[2023.78,19751],[2023.799,19543],[2023.819,19047],[2023.838,19231],[2023.857,19425],[2023.876,19732],[2023.895,19795],[2023.914,20268],[2023.934,20969],[2023.953,21457],[2023.972,21349],[2023.991,21731],[2024.011,21711],[2024.03,21895],[2024.049,21622],[2024.068,21353],[2024.088,21854],[2024.107,21782],[2024.126,22041],[2024.145,22213],[2024.164,22339],[2024.183,22494],[2024.203,22023],[2024.222,22097],[2024.241,22327],[2024.26,22514],[2024.279,22519],[2024.298,22147],[2024.318,22420],[2024.337,22476],[2024.356,22055],[2024.375,22466],[2024.394,22957],[2024.413,22531],[2024.433,23290],[2024.452,23466],[2024.471,23501],[2024.49,24011],[2024.509,24324],[2024.528,24502],[2024.548,24531],[2024.567,24835],[2024.586,24718],[2024.605,24368],[2024.624,24541],[2024.643,24823],[2024.663,25236],[2024.682,24852],[2024.701,25356],[2024.72,25791],[2024.736,26216],[2024.739,26179],[2024.758,25015],[2024.778,24964],[2024.797,24854],[2024.816,24181],[2024.835,24205],[2024.854,24148],[2024.873,23533],[2024.893,23907],[2024.912,24131],[2024.931,24678],[2024.95,24768],[2024.969,23588],[2024.988,23813],[2025.005,24005],[2025.025,23432],[2025.044,23203],[2025.063,23092],[2025.082,23508],[2025.101,23560],[2025.12,22929],[2025.14,22796],[2025.159,22125],[2025.17,22083],[2025.178,22552],[2025.197,22397],[2025.216,23350],[2025.235,23519],[2025.255,22904],[2025.274,22829],[2025.293,23852],[2025.312,24039],[2025.331,24347],[2025.35,24008],[2025.37,25020],[2025.389,24853],[2025.408,24751],[2025.427,25003],[2025.446,24719],[2025.465,25112],[2025.485,25638],[2025.504,25461],[2025.523,25150],[2025.542,24968],[2025.561,24837],[2025.58,24565],[2025.6,24363],[2025.619,24631],[2025.638,24870],[2025.657,24427],[2025.676,24741],[2025.695,25114],[2025.715,25327],[2025.734,24655],[2025.753,24894],[2025.772,25285],[2025.791,25710],[2025.81,25795],[2025.83,25722],[2025.849,25492],[2025.868,25910],[2025.887,26068],[2025.906,26203],[2025.925,26186],[2025.945,26047],[2025.964,25966],[2025.983,26042],[2026.003,26329],[2026.022,25683],[2026.041,25694],[2026.06,25049],[2026.079,25321],[2026.099,25694],[2026.118,25471],[2026.137,25571],[2026.156,25179],[2026.175,24450],[2026.194,23151],[2026.214,23114],[2026.233,22820],[2026.252,22713],[2026.271,24051],[2026.29,24354],[2026.309,23898],[2026.329,23998],[2026.348,24176],[2026.367,23644],[2026.386,23719],[2026.405,23548],[2026.424,23367],[2026.444,23623],[2026.463,24013],[2026.482,24056],[2026.501,24271],[2026.52,24207],[2026.539,24334],[2026.559,23767],[2026.578,24384],[2026.597,24571],[2026.616,24366],[2026.635,24252],[2026.654,24176],[2026.674,23898],[2026.693,23398],[2026.712,23346],[2026.731,23140],[2026.75,22422],[2026.767,22232],[2026.769,22520],[2026.789,23146],[2026.797,22889]];
 const CRASH_V2=[{"n":"Dot-com bust","p":"2000-02-11","t":"2001-09-21","r":"2003-12-18","pv":1756,"tv":854,"f":-51.4,"dn":588,"up":818,"tot":1406,"m":{"100":[-51.4,1406],"70":[-32.5,1340],"50":[-19.9,1276],"30":[-7.8,728]}},{"n":"Election shock","p":"2004-01-14","t":"2004-05-17","r":"2004-12-02","pv":1982,"tv":1389,"f":-29.9,"dn":124,"up":199,"tot":323,"m":{"100":[-29.9,323],"70":[-20.3,320],"50":[-13.8,301],"30":[-7.4,261]}},{"n":"Emerging-market sell-off","p":"2006-05-10","t":"2006-06-14","r":"2006-10-30","pv":3754,"tv":2633,"f":-29.9,"dn":35,"up":138,"tot":173,"m":{"100":[-29.9,173],"70":[-20.7,159],"50":[-14.6,156],"30":[-8.5,134]}},{"n":"Global sell-off","p":"2007-02-07","t":"2007-03-05","r":"2007-05-21","pv":4224,"tv":3576,"f":-15.3,"dn":26,"up":77,"tot":103,"m":{"100":[-15.3,103],"70":[-10.6,99],"50":[-7.4,77],"30":[-4.3,75]}},{"n":"Global financial crisis","p":"2008-01-08","t":"2008-10-27","r":"2010-11-05","pv":6288,"tv":2524,"f":-59.9,"dn":293,"up":739,"tot":1032,"m":{"100":[-59.9,1032],"70":[-40.2,979],"50":[-27.1,808],"30":[-14.0,573]}},{"n":"Euro-debt & policy slowdown","p":"2010-11-05","t":"2011-12-20","r":"2013-11-03","pv":6312,"tv":4544,"f":-28.0,"dn":410,"up":684,"tot":1094,"m":{"100":[-28.0,1094],"70":[-17.2,762],"50":[-10.0,679],"30":[-4.0,184]}},{"n":"China slowdown & oil","p":"2015-03-03","t":"2016-02-25","r":"2017-03-14","pv":8996,"tv":6971,"f":-22.5,"dn":359,"up":383,"tot":742,"m":{"100":[-22.5,742],"70":[-13.7,510],"50":[-7.9,457],"30":[-3.0,78]}},{"n":"Covid crash","p":"2020-01-14","t":"2020-03-23","r":"2020-11-09","pv":12362,"tv":7610,"f":-38.4,"dn":69,"up":231,"tot":300,"m":{"100":[-38.4,300],"70":[-26.5,297],"50":[-18.6,269],"30":[-10.6,217]}},{"n":"Rate hikes & war","p":"2021-10-18","t":"2022-06-17","r":"2022-11-24","pv":18477,"tv":15294,"f":-17.2,"dn":242,"up":160,"tot":402,"m":{"100":[-17.2,402],"70":[-10.7,382],"50":[-6.5,210],"30":[-3.1,112]}},{"n":"Valuation correction","p":"2024-09-26","t":"2025-03-04","r":"2026-01-02","pv":26216,"tv":22083,"f":-15.8,"dn":159,"up":304,"tot":463,"m":{"100":[-15.8,463],"70":[-10.1,274],"50":[-6.4,253],"30":[-2.6,211]}},{"n":"The current fall","p":"2026-01-02","t":"2026-10-08","r":null,"pv":26329,"tv":22232,"f":-15.6,"dn":279,"up":null,"tot":null,"m":{"100":[-15.6,null],"70":[-10.1,null],"50":[-6.8,null],"30":[-3.4,182]}}];
-const VOL5_V2={"2000":{"100":24.2,"70":14.2,"50":9.2,"30":5.1},"2004":{"100":22.5,"70":15.0,"50":10.4,"30":6.1},"2008":{"100":31.6,"70":18.0,"50":11.6,"30":6.3},"2020":{"100":32.2,"70":20.8,"50":14.1,"30":8.1},"2024":{"100":12.7,"70":8.6,"50":6.0,"30":3.5}};
 
-/* ================= Instinct: the ride you would take (candles), and two flat years (line) ================= */
+/* ================= Instinct · your turbulence line, on the Nifty 50 since 2000 ================= */
 const $ = s => document.querySelector(s);
-const D = NIFTY_V2, TN = D[D.length - 1][0], VN = D[D.length - 1][1];
-const FI = .0702, INF = .06;
+const D = NIFTY_V2, T0 = D[0][0], TN = D[D.length - 1][0], VN = D[D.length - 1][1];
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const my = t => MON[Math.min(11, Math.floor((t % 1) * 12))] + " " + Math.floor(t);
 const fmt = n => Math.round(n).toLocaleString("en-IN");
-const av = a => a.reduce((x, y) => x + y, 0) / a.length;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const ty = s => { const d = new Date(s); return d.getFullYear() + (d.getMonth() + (d.getDate() - 1) / 31) / 12; };
 const at = (S, t) => { let lo = 0, hi = S.length - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (S[m][0] <= t) lo = m; else hi = m - 1; } return lo; };
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
 
-/* the five falls and four rides through them, rebalanced each January */
-const EV = ["2000", "2004", "2008", "2020", "2024"];
-const FALLS = CRASH_V2.filter(e => EV.includes(e.p.slice(0, 4))).map(e => ({ ...e, k: e.p.slice(0, 4), tp: ty(e.p), tr: e.r ? ty(e.r) : TN }));
-const RIDES = [
-  { v: 100, k: "k0", r: "I",   c: ["#9E4A62", "#5E0E2C"] },
-  { v: 70,  k: "k1", r: "II",  c: ["#C98E73", "#8A4632"] },
-  { v: 50,  k: "k2", r: "III", c: ["#D9B77A", "#A97F3F"] },
-  { v: 30,  k: "k3", r: "IV",  c: ["#8FB09E", "#3F6655"] }];
-const mixSeries = (() => { const c = {}; return w => {
-  if (c[w]) return c[w]; if (w === 1) return c[w] = D;
-  let e = w, f = 1 - w, yr = Math.floor(D[0][0]); const out = [[D[0][0], D[0][1]]];
-  for (let i = 1; i < D.length; i++) { const [t, v] = D[i], [t0, v0] = D[i - 1]; e *= v / v0; f *= Math.pow(1 + FI, t - t0);
-    if (Math.floor(t) > yr) { yr = Math.floor(t); const s = e + f; e = s * w; f = s * (1 - w); } out.push([t, (e + f) * D[0][1]]); }
-  return c[w] = out; }; })();
-const ride = m => ({ f: av(FALLS.map(e => e.m[m][0])), d: av(FALLS.map(e => e.m[m][1])) });
-const months = d => Math.round(d / 30.44);
+/* how far below its running high the Nifty sat, each week */
+const DD = []; { let hi = 0; D.forEach(([, v], i) => { hi = Math.max(hi, v); DD[i] = v / hi - 1; }); }
+const NOW = DD[DD.length - 1];
 
+/* the five sharp falls since 2000 */
+const NAME = { "2000": "Dot-com bust", "2004": "Election shock", "2008": "Financial crisis", "2020": "Covid crash", "2024": "Correction" };
+const FALLS = CRASH_V2.filter(e => NAME[e.p.slice(0, 4)]).map(e => ({ k: e.p.slice(0, 4), n: NAME[e.p.slice(0, 4)], f: Math.abs(e.f), tp: ty(e.p), tt: ty(e.t), tr: e.r ? ty(e.r) : TN }));
 
-/* two flat years, on ₹1 Cr */
-const G2 = Math.pow(1 + FI, 2), I2 = Math.pow(1 + INF, 2);
-const FLATS = [
-  { v: "infl", k: "k3", n: "Just Beat Inflation",     fig: G2,     cap: "in two years",                         c: ["#8FB09E", "#3F6655"] },
-  { v: "stay", k: "k2", n: "Stay Put",                fig: 1,      cap: `₹${(1 / I2).toFixed(2)} Cr after inflation`, c: ["#D9B77A", "#A97F3F"], bar: 1 / I2 },
-  { v: "eq",   k: "k0", n: "Allocate More to Equity", fig: 1,      cap: "plus more units",                      c: ["#9E4A62", "#5E0E2C"] }];
-const FT0 = 2023.75, FS = D.slice(at(D, FT0)), PK = Math.max(...FS.map(p => p[1]));
+/* the four lines */
+const LINES = [
+  { k: "steady",   n: "Steady",   r: "up to 10%",   v: 10, ic: "M3 12c3 0 3-1.2 6-1.2s3 1.2 6 1.2 3-1.2 6-1.2" },
+  { k: "measured", n: "Measured", r: "10 – 20%",    v: 20, ic: "M3 12c3 0 3-3.5 6-3.5s3 3.5 6 3.5 3-3.5 6-3.5" },
+  { k: "bold",     n: "Bold",     r: "20 – 35%",    v: 35, ic: "M3 9c3 0 3 7 6 7s3-7 6-7 3 7 6 7" },
+  { k: "fearless", n: "Fearless", r: "35% or more", v: 45, ic: "M3 7l4 10 4-7 4 8 6-13" }];
 
-let S = { crash: null, flat: null };
-try { const s = JSON.parse(localStorage.getItem("wiq-instinct2") || "null"); if (s) S = Object.assign(S, s); } catch (e) {}
-const save = () => { try { localStorage.setItem("wiq-instinct2", JSON.stringify(S)); } catch (e) {} };
+let sel = null; try { const s = localStorage.getItem("wiq-line"); if (LINES.some(l => l.k === s)) sel = s; } catch (e) {}
+let thr = null, mixK = 0, raf = 0;
 
-/* ---------------- answer tiles ---------------- */
-const TICK = `<span class="tick" aria-hidden="true"></span>`;
-$("#oL").innerHTML = RIDES.map((o, i) => { const r = ride(o.v);
-  return `<button type="button" class="opt ${o.k} rise" style="--d:${.15 + i * .05}s" data-q="crash" data-v="${o.v}" aria-pressed="false" aria-label="Ride ${o.r}, average fall ${Math.abs(r.f).toFixed(0)} percent">
-    <div class="o-top"><span class="o-tag">Ride ${o.r}</span>${TICK}</div>
-    <div class="o-row"><b class="o-fig">−${Math.abs(r.f).toFixed(0)}<small>%</small></b><span class="mix">${o.v} : ${100 - o.v}</span></div><span class="o-cap">${months(r.d)} months to recover</span>
-    <div class="bar"><i style="--w:${(Math.abs(r.f) / 60 * 100).toFixed(1)}%;--d:${.3 + i * .07}s"></i></div></button>`; }).join("");
-$("#oR").innerHTML = FLATS.map((o, i) => `<button type="button" class="opt ${o.k} rise" style="--d:${.15 + i * .05}s" data-q="flat" data-v="${o.v}" aria-pressed="false">
-    <div class="o-top"><span class="o-name">${o.n}</span>${TICK}</div>
-    <b class="o-fig">₹${o.fig.toFixed(2)}<small>Cr</small></b><span class="o-cap">${o.cap}</span>
-    <div class="bar"><i style="--w:${((o.bar || o.fig) / 1.2 * 100).toFixed(1)}%;--d:${.3 + i * .07}s"></i></div></button>`).join("");
-requestAnimationFrame(() => requestAnimationFrame(() => document.querySelectorAll(".opts").forEach(g => g.classList.add("in"))));
-document.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
-  const q = b.dataset.q; S[q] = q === "crash" ? +b.dataset.v : b.dataset.v; save(); mark();
-  if (q === "crash") morphL(); else drawR(true, true);
-}));
-function mark() {
-  document.querySelectorAll(".opt").forEach(b => { const on = String(S[b.dataset.q]) === b.dataset.v; b.classList.toggle("sel", on); b.setAttribute("aria-pressed", on); });
-  $("#go").disabled = S.crash == null || S.flat == null;
-}
-$("#go").addEventListener("click", () => { const t = $("#toast"); t.textContent = "Instinct saved. Reach is next."; t.classList.add("on"); setTimeout(() => t.classList.remove("on"), 2800); });
-$("#why").addEventListener("click", e => { const b = e.currentTarget; b.setAttribute("aria-expanded", b.getAttribute("aria-expanded") !== "true"); });
-document.addEventListener("click", e => { if (!e.target.closest("#why")) $("#why").setAttribute("aria-expanded", "false"); });
+/* ---------------- the four buttons ---------------- */
+$("#seg").innerHTML = LINES.map(l => `<button type="button" role="radio" aria-checked="false" data-k="${l.k}"><i class="coin"><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="${l.ic}"/></svg></i><span><b>${l.n}</b><small>${l.r}</small></span></button>`).join("");
+$("#seg").querySelectorAll("button").forEach(b => b.addEventListener("click", () => choose(b.dataset.k)));
+$("#seg").addEventListener("keydown", e => { if (!/Arrow(Left|Right|Up|Down)/.test(e.key)) return; e.preventDefault();
+  const i = LINES.findIndex(l => l.k === sel), n = (i < 0 ? 0 : i + (/Right|Down/.test(e.key) ? 1 : -1) + 4) % 4; choose(LINES[n].k); $("#seg").querySelectorAll("button")[n].focus(); });
+$("#fl").innerHTML = FALLS.map(f => `<li data-k="${f.k}"><span class="mk"><svg viewBox="0 0 12 12"><path class="ok" d="M2.8 6.3l2.1 2.1 4.3-4.6"/><path class="no" d="M3.5 6h5"/></svg></span><span class="y num">${f.k}</span><span>${f.n}</span><span class="d num">−${f.f.toFixed(0)}%</span></li>`).join("");
 
-/* count a figure from what is shown to what it should say */
 function countTo(el, txt, anim) {
-  const m = txt.match(/-?[\d,]*\.?\d+/);
+  const m = txt.match(/[\d.]+/);
   if (!anim || RM || !m) { el.textContent = txt; return; }
-  const cur = parseFloat((el.textContent.replace("−", "-").match(/-?[\d,]*\.?\d+/) || ["0"])[0].replace(/,/g, "")) || 0;
-  const raw = m[0], n = parseFloat(raw.replace(/,/g, "")), dec = (raw.split(".")[1] || "").length, comma = raw.includes(","), t0 = performance.now();
-  const step = now => { const k = Math.min(1, (now - t0) / 800), v = cur + (n - cur) * (1 - Math.pow(1 - k, 3));
-    el.textContent = txt.replace(raw, comma ? fmt(v) : v.toFixed(dec)); if (k < 1) requestAnimationFrame(step); };
+  const cur = parseFloat((el.textContent.match(/[\d.]+/) || ["0"])[0]) || 0, n = parseFloat(m[0]), dec = (m[0].split(".")[1] || "").length, t0 = performance.now();
+  const step = now => { const k = Math.min(1, (now - t0) / 700), v = cur + (n - cur) * (1 - Math.pow(1 - k, 3));
+    el.textContent = txt.replace(m[0], v.toFixed(dec)); if (k < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }
-const gps = (cx, cy, c, pop) => `<g class="gps${pop ? " pop" : ""}" style="transform-origin:${cx}px ${cy}px"><circle class="rp" cx="${cx}" cy="${cy}" r="5" fill="${c}" style="transform-origin:${cx}px ${cy}px"/><circle class="rp rp2" cx="${cx}" cy="${cy}" r="5" fill="${c}" style="transform-origin:${cx}px ${cy}px"/><circle cx="${cx}" cy="${cy}" r="4.6" fill="${c}" stroke="#fff" stroke-width="1.8"/></g>`;
-const pathOf = (A, x, y) => A.map(([t, v], i) => (i ? "L" : "M") + x(t).toFixed(1) + " " + y(v).toFixed(1)).join("");
-const size = el => { const r = el.getBoundingClientRect(); return [Math.max(260, r.width), Math.max(220, r.height)]; };
-const setLen = svg => svg.querySelectorAll(".draw").forEach(p => p.style.setProperty("--len", Math.ceil(p.getTotalLength())));
+function readings(anim) {
+  const L = LINES.find(l => l.k === sel);
+  $("#seg").querySelectorAll("button").forEach(b => { const on = b.dataset.k === sel; b.classList.toggle("on", on); b.setAttribute("aria-checked", on); b.tabIndex = on || (!sel && b.dataset.k === "steady") ? 0 : -1; });
+  ["#rA", "#rB", "#rC"].forEach(s => $(s).classList.toggle("mute", !L));
+  $("#legend").classList.toggle("on", !!L);
+  $("#go").classList.toggle("ready", !!L); $("#go").setAttribute("aria-disabled", !L);
+  if (!L) { $("#rA").textContent = "—"; $("#rB").textContent = "—"; $("#rC").textContent = "—"; return; }
+  const v = L.v / 100, held = FALLS.filter(f => f.f <= L.v).length;
+  countTo($("#rA"), `₹${(10 * (1 - v)).toFixed(1)} Cr`, anim);
+  countTo($("#rB"), `+${((1 / (1 - v) - 1) * 100).toFixed(0)}%`, anim);
+  $("#rC").innerHTML = `${held}<small>of 5</small>`;
+  $("#fl").querySelectorAll("li").forEach(li => { const f = FALLS.find(z => z.k === li.dataset.k), ok = f.f <= L.v; li.classList.toggle("held", ok); li.classList.toggle("over", !ok); });
+}
+function choose(k) {
+  if (k === sel) return; sel = k; try { localStorage.setItem("wiq-line", k); } catch (e) {}
+  readings(true); headDefault();
+  /* the line glides to its new depth; the falls take their colour on the way */
+  const to = LINES.find(l => l.k === k).v, from = thr == null ? 0 : thr, k0 = mixK, t0 = performance.now(), dur = RM ? 1 : 850;
+  cancelAnimationFrame(raf);
+  const step = now => { const e = ease(Math.min(1, (now - t0) / dur)); thr = from + (to - from) * e; mixK = k0 + (1 - k0) * e; draw(false); if (e < 1) raf = requestAnimationFrame(step); };
+  raf = requestAnimationFrame(step);
+}
 
-/* ---------------- left: half-year candles; a ride reshapes them and lights its falls ---------------- */
-const STEP = 1;
-const agg = A => { const out = []; let cur = null;
-  for (const [t, v] of A) { const k = Math.floor(t / STEP + 1e-9);
-    if (!cur || cur.k !== k) { if (cur) out.push(cur); const o = cur ? cur.c : v; cur = { k, t: k * STEP, o, h: Math.max(o, v), l: Math.min(o, v), c: v }; }
-    else { cur.h = Math.max(cur.h, v); cur.l = Math.min(cur.l, v); cur.c = v; } }
-  out.push(cur); return out; };
-const CAND = (() => { const c = {}; return m => c[m] || (c[m] = agg(m == null || m === 100 ? D : mixSeries(m / 100))); })();
-/* a candle is part of a fall when it sits between the peak and the low */
-const LIT = CAND(null).map(c => FALLS.some(e => c.t + STEP > e.tp && c.t <= ty(e.t)) ? 1 : 0);
-const gL = $("#gL"); let HL = null, nowC = null, nowLit = null, rafL = 0, hovL = -1;
-const DEF = `<defs>
-  <linearGradient id="cu" x1="0" x2="1"><stop offset="0" stop-color="#EBCB8E"/><stop offset=".45" stop-color="#C9A25E"/><stop offset="1" stop-color="#957033"/></linearGradient>
-  <linearGradient id="cd" x1="0" x2="1"><stop offset="0" stop-color="#9B3A57"/><stop offset=".45" stop-color="#6A1533"/><stop offset="1" stop-color="#3D0016"/></linearGradient>
-  <filter id="cg" x="-80%" y="-30%" width="260%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="3.2" flood-color="#C29A57" flood-opacity=".55"/></filter>
-  <filter id="cs" x="-50%" y="-10%" width="200%" height="130%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.4" flood-color="#3D0016" flood-opacity=".18"/></filter></defs>`;
-function drawL(anim) {
-  const [W, H] = size($("#pL")), m = S.crash, P = { l: 24, r: 76, t: 96, b: 52 }, C = nowC || CAND(m), lit = nowLit || C.map(() => 1);
-  gL.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const t0 = C[0].t, t1 = C[C.length - 1].t + STEP, lo = 780, hi = 28000, L = Math.log;
-  const x = t => P.l + (t - t0) / (t1 - t0) * (W - P.l - P.r), y = v => H - P.b - (L(v) - L(lo)) / (L(hi) - L(lo)) * (H - P.t - P.b);
-  let h = DEF; const tagY = y(C[C.length - 1].c);
-  [1000, 3000, 10000, 30000].forEach(v => h += `<line x1="${P.l}" x2="${W - P.r + 8}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--grid)"/>${Math.abs(y(v) - tagY) > 14 ? `<text x="${W - 22}" y="${y(v) + 3.5}" text-anchor="end" class="ax">${v / 1000}k</text>` : ""}`);
+/* ---------------- the chart: price above, fall from peak below ---------------- */
+const svg = $("#g"), vis = $("#vis"); let G = null;
+const gps = (cx, cy, pop) => `<g class="gps${pop ? " pop" : ""}"><circle class="rp" cx="${cx}" cy="${cy}" r="5" style="fill:var(--line)"/><circle class="rp rp2" cx="${cx}" cy="${cy}" r="5" style="fill:var(--line)"/><circle cx="${cx}" cy="${cy}" r="4.6" style="fill:var(--line);stroke:var(--card)" stroke-width="2"/></g>`;
+function drawPrice(anim) {
+  const r = vis.getBoundingClientRect(), W = Math.max(300, r.width), H = Math.max(420, r.height);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const P = { l: 26, r: 66, t: 112, b: 34 }, gap = 40, ddH = Math.round((H - P.t - P.b - gap) * .3), mainB = H - P.b - ddH - gap, ddT = mainB + gap, ddB = H - P.b;
+  const x = t => P.l + (t - T0) / (TN - T0) * (W - P.l - P.r), L = Math.log, lo = 760, hi = 34000;
+  const y = v => mainB - (L(v) - L(lo)) / (L(hi) - L(lo)) * (mainB - P.t), dy = p => ddT + (-p / .7) * (ddB - ddT);
+  const on = thr != null, held = f => f <= thr + 1e-6;
+  let h = `<defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--area)" stop-opacity=".22"/><stop offset="1" style="stop-color:var(--area)" stop-opacity="0"/></linearGradient>
+    <clipPath id="cIn"><rect x="0" y="${dy(0) - 1}" width="${W}" height="${on ? Math.max(0, dy(-thr / 100) - dy(0) + 1) : 0}"/></clipPath>
+    <clipPath id="cOut"><rect x="0" y="${on ? dy(-thr / 100) : ddB}" width="${W}" height="${ddB}"/></clipPath></defs>`;
+  /* price pane */
+  [1000, 3000, 10000, 30000].forEach(v => h += `<line x1="${P.l}" x2="${W - P.r + 10}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--grid)"/><text x="${W - 24}" y="${y(v) + 3.5}" text-anchor="end" class="ax">${v / 1000}k</text>`);
   for (let yr = 2004; yr <= 2024; yr += 4) h += `<text x="${x(yr)}" y="${H - 12}" text-anchor="middle" class="ax">${yr}</text>`;
-  const slot = x(STEP) - x(0), cw = Math.max(5, Math.min(24, slot * .7));
-  C.forEach((c, i) => { const up = c.c >= c.o, cx = x(c.t + STEP / 2), yt = y(Math.max(c.o, c.c)), yb = y(Math.min(c.o, c.c)), op = m == null ? 1 : .34 + .66 * lit[i];
-    const wick = up ? "#B08A4A" : "#5E0E2C";
-    h += `<g class="${anim ? "cdl" : ""}" style="opacity:${op.toFixed(3)};--i:${i};transform-origin:${cx}px ${up ? yb : yt}px">
-      <line x1="${cx}" x2="${cx}" y1="${y(c.h)}" y2="${y(c.l)}" stroke="${wick}" stroke-width="1.2" stroke-linecap="round"/>
-      <rect x="${(cx - cw / 2).toFixed(1)}" y="${yt.toFixed(1)}" width="${cw.toFixed(1)}" height="${Math.max(1.5, yb - yt).toFixed(1)}" rx="${Math.min(2, cw / 4)}" fill="url(#${up ? "cu" : "cd"})" filter="url(#${m != null && lit[i] > .5 ? "cg" : "cs"})"/>
-      <line x1="${(cx - cw / 2 + 1.2).toFixed(1)}" x2="${(cx - cw / 2 + 1.2).toFixed(1)}" y1="${(yt + 1.5).toFixed(1)}" y2="${Math.max(yt + 1.5, yb - 1.5).toFixed(1)}" stroke="#fff" stroke-opacity="${up ? .55 : .22}" stroke-width=".8"/></g>`; });
-  /* each fall: its depth for this ride, under the low */
-  const lowOf = e => { let lw = -1; C.forEach((c, i) => { if (c.t + STEP > e.tp && c.t <= e.tr && (lw < 0 || c.l < C[lw].l)) lw = i; }); return lw; };
-  const rowY = H - P.b + 14;
-  FALLS.forEach(e => { const lw = lowOf(e), lx = x(C[lw].t + STEP / 2), wy = y(C[lw].l);
-    h += `<g class="${anim ? "fade" : ""}"><line x1="${lx}" x2="${lx}" y1="${wy + 5}" y2="${rowY - 12}" style="stroke:var(--line2)" stroke-dasharray="1.5 2.5"/>
-      <text x="${lx}" y="${rowY}" text-anchor="middle" class="labk">${e.m[m || 100][0].toFixed(0)}%</text></g>`; });
-  /* the last close: a quiet live line and price tag */
-  const lc = C[C.length - 1].c, ly = y(lc);
-  h += `<line x1="${P.l}" x2="${W - P.r + 8}" y1="${ly}" y2="${ly}" style="stroke:var(--dn)" stroke-opacity=".35" stroke-dasharray="2 3"/>
-    <rect x="${W - P.r + 10}" y="${ly - 9}" width="${P.r - 18}" height="18" rx="9" style="fill:var(--dn)"/><text x="${W - P.r + 10 + (P.r - 18) / 2}" y="${ly + 3.5}" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#fff">${m == null || m === 100 ? (lc / 1000).toFixed(1) + "k" : "₹" + (lc / C[0].o).toFixed(1) + "Cr"}</text>
-    ${gps(x(C[C.length - 1].t + STEP / 2), ly, "#5E0E2C", false)}`;
-  h += `<rect id="hLr" rx="4" style="fill:var(--ink);display:none" opacity=".05"/><rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>`;
-  gL.innerHTML = h;
-  gL.setAttribute("aria-label", "Nifty 50 yearly candles since 2000; the five falls are marked");
-  HL = { x, W, H, P, slot, C, t0 };
+  const line = D.map(([t, v], i) => (i ? "L" : "M") + x(t).toFixed(1) + " " + y(v).toFixed(1)).join("");
+  h += `<path class="${anim ? "fade" : ""}" d="${line}L${x(TN)} ${mainB}L${x(T0)} ${mainB}Z" fill="url(#ga)"/>`;
+  h += `<path class="${anim ? "draw" : ""}" d="${line}" fill="none" style="stroke:var(--line)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity="${(1 - .45 * mixK).toFixed(3)}"/>`;
+  /* each fall, peak to recovery, takes the colour of your line */
+  if (on) FALLS.forEach(f => { const a = at(D, f.tp), b = at(D, f.tr), c = held(f.f) ? "var(--held)" : "var(--beyond)";
+    let s = ""; for (let i = a; i <= b; i++) s += (i > a ? "L" : "M") + x(D[i][0]).toFixed(1) + " " + y(D[i][1]).toFixed(1);
+    const lw = at(D, f.tt);
+    h += `<path d="${s}" fill="none" style="stroke:${c}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" opacity="${mixK.toFixed(3)}"/>
+      <circle cx="${x(D[lw][0])}" cy="${y(D[lw][1])}" r="3.4" style="fill:var(--card);stroke:${c}" stroke-width="1.6" opacity="${mixK.toFixed(3)}"/>`; });
+  h += gps(x(TN), y(VN), anim);
+  /* fall-from-peak pane */
+  h += `<text x="${P.l}" y="${ddT - 16}" class="cap-t">FALL FROM PEAK</text>`;
+  [0, -.3, -.6].forEach(p => h += `<line x1="${P.l}" x2="${W - P.r + 10}" y1="${dy(p)}" y2="${dy(p)}" style="stroke:var(--grid)"/><text x="${W - 24}" y="${dy(p) + 3.5}" text-anchor="end" class="ax">${p ? "−" + Math.abs(p * 100) + "%" : "0%"}</text>`);
+  const dd = `M${x(T0)} ${dy(0)}` + D.map(([t], i) => "L" + x(t).toFixed(1) + " " + dy(DD[i]).toFixed(1)).join("") + `L${x(TN)} ${dy(0)}Z`;
+  h += `<g class="${anim ? "drop" : ""}"><path d="${dd}" style="fill:var(--ink)" opacity="${(.1 * (1 - mixK)).toFixed(3)}"/>`;
+  if (on) h += `<path d="${dd}" clip-path="url(#cIn)" style="fill:var(--held)" opacity="${(.42 * mixK).toFixed(3)}"/><path d="${dd}" clip-path="url(#cOut)" style="fill:var(--beyond)" opacity="${(.62 * mixK).toFixed(3)}"/>`;
+  h += `<path d="${D.map(([t], i) => (i ? "L" : "M") + x(t).toFixed(1) + " " + dy(DD[i]).toFixed(1)).join("")}" fill="none" style="stroke:var(--ink)" stroke-width=".8" opacity=".35"/></g>`;
+  /* depth of each fall, under its low */
+  FALLS.forEach(f => { let lw = at(D, f.tp); for (let i = lw, e = at(D, f.tr); i <= e; i++) if (DD[i] < DD[lw]) lw = i;
+    const c = on ? (held(f.f) ? "var(--held)" : "var(--beyond)") : "var(--ink-2)";
+    h += `<text class="fl ${anim ? "fade" : ""}" x="${clamp(x(D[lw][0]), P.l + 14, W - P.r - 14)}" y="${dy(DD[lw]) + 15}" text-anchor="middle" style="fill:${c}">−${f.f.toFixed(0)}%</text>`; });
+  /* your line */
+  if (on) { const ly = dy(-thr / 100);
+    h += `<g opacity="${mixK.toFixed(3)}"><rect x="${P.l}" y="${dy(0)}" width="${W - P.l - P.r + 10}" height="${ly - dy(0)}" style="fill:var(--held)" opacity=".06"/>
+      <line x1="${P.l}" x2="${W - P.r + 10}" y1="${ly}" y2="${ly}" style="stroke:var(--ink)" stroke-width="1" stroke-dasharray="4 4" opacity=".6"/>
+      <rect x="${W - P.r + 12}" y="${ly - 10}" width="${P.r - 18}" height="20" rx="10" style="fill:var(--acc)"/><text x="${W - P.r + 12 + (P.r - 18) / 2}" y="${ly + 4}" text-anchor="middle" style="font-size:10.5px;font-weight:500;fill:var(--card)">−${thr.toFixed(0)}%</text></g>`; }
+  h += `<g id="hv" style="display:none"><line id="hvl" y1="${P.t - 8}" y2="${ddB}" style="stroke:var(--ink)" stroke-width="1" opacity=".18"/><circle id="hv1" r="4" style="fill:var(--card);stroke:var(--line)" stroke-width="1.8"/><circle id="hv2" r="3" style="fill:var(--ink)"/></g><rect x="0" y="${P.t - 20}" width="${W}" height="${H - P.t + 20}" fill="transparent"/>`;
+  svg.innerHTML = h;
+  svg.querySelectorAll(".draw").forEach(p => p.style.setProperty("--len", Math.ceil(p.getTotalLength())));
+  svg.setAttribute("aria-label", `Nifty 50 since 2000, now ${fmt(VN)}${on ? `; your line at −${thr.toFixed(0)}%` : ""}`);
+  G = { x, y, dy, W, P };
 }
-function headL(anim) {
-  const m = S.crash, R = RIDES.find(o => o.v === m);
-  if (m == null) { countTo($("#vL"), fmt(VN), anim); $("#cL").textContent = "Nifty 50 · yearly candles since 2000"; $("#sL").innerHTML = "<span style='opacity:.8'>Hover a candle</span>"; }
-  else { const r = ride(m); countTo($("#vL"), `−${Math.abs(r.f).toFixed(0)}%`, anim); $("#cL").textContent = `average fall · ${m} : ${100 - m}`;
-    $("#sL").innerHTML = `Ride ${R.r} · falls lit`; }
+/* V2: one candle per fall, from the peak down to its low, and today's dip beside them */
+const FC = FALLS.map(f => ({ ...f, mo: Math.round((f.tr - f.tp) * 12) })).concat([{ k: "Now", n: "Today", f: Math.abs(NOW * 100), now: true }]);
+let hovF = null;
+function drawFalls(anim) {
+  const r = vis.getBoundingClientRect(), W = Math.max(300, r.width), H = Math.max(420, r.height);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const P = { l: 26, r: 66, t: 150, b: 70 }, on = thr != null, n = FC.length, slot = (W - P.l - P.r) / n, cw = Math.min(46, slot * .44);
+  const y = p => P.t + p / 66 * (H - P.b - P.t), cx = i => P.l + slot * (i + .5);
+  let h = `<defs>
+    <linearGradient id="kN" x1="0" x2="1"><stop offset="0" style="stop-color:var(--ink)" stop-opacity=".16"/><stop offset="1" style="stop-color:var(--ink)" stop-opacity=".3"/></linearGradient>
+    <linearGradient id="kH" x1="0" x2="1"><stop offset="0" stop-color="#EBCB8E"/><stop offset=".5" stop-color="#C9A25E"/><stop offset="1" stop-color="#957033"/></linearGradient>
+    <linearGradient id="kB" x1="0" x2="1"><stop offset="0" stop-color="#9B3A57"/><stop offset=".5" stop-color="#6A1533"/><stop offset="1" stop-color="#3D0016"/></linearGradient>
+    <filter id="kg" x="-60%" y="-20%" width="220%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#C9A04A" flood-opacity=".35"/></filter></defs>`;
+  [0, 10, 20, 30, 40, 50, 60].forEach(p => h += `<line x1="${P.l}" x2="${W - P.r + 10}" y1="${y(p)}" y2="${y(p)}" style="stroke:var(--grid)"/><text x="${W - 24}" y="${y(p) + 3.5}" text-anchor="end" class="ax">${p ? "−" + p + "%" : "Peak"}</text>`);
+  if (on) { const ly = y(thr);
+    h += `<g opacity="${mixK.toFixed(3)}"><rect x="${P.l}" y="${y(0)}" width="${W - P.l - P.r + 10}" height="${ly - y(0)}" style="fill:var(--held)" opacity=".07"/></g>`; }
+  FC.forEach((f, i) => {
+    const x = cx(i), top = y(0), bot = y(f.f), hot = hovF === f.k, dim = hovF && !hot ? .35 : 1, ok = on && f.f <= thr + 1e-6;
+    const g = on ? (ok ? "kH" : "kB") : "kN";
+    h += `<g style="opacity:${dim};transition:opacity .3s">`;
+    h += `<g class="${anim ? "kd" : ""}" style="animation-delay:${(i * .09).toFixed(2)}s">`;
+    h += `<line x1="${x}" x2="${x}" y1="${top - 8}" y2="${bot + 8}" style="stroke:${on ? (ok ? "#B08A4A" : "#5E0E2C") : "var(--ink)"}" stroke-opacity="${on ? 1 : .35}" stroke-width="1.4" stroke-linecap="round"${f.now ? ' stroke-dasharray="2 3"' : ""}/>`;
+    if (f.now) h += `<rect x="${x - cw / 2}" y="${top}" width="${cw}" height="${bot - top}" rx="7" style="fill:var(--card);stroke:${on ? (ok ? "#B08A4A" : "#8C2A42") : "var(--ink)"}" stroke-opacity="${on ? 1 : .4}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+    else { h += `<rect x="${x - cw / 2}" y="${top}" width="${cw}" height="${bot - top}" rx="7" fill="url(#kN)"/>`;
+      if (on) h += `<rect x="${x - cw / 2}" y="${top}" width="${cw}" height="${bot - top}" rx="7" fill="url(#${g})" opacity="${mixK.toFixed(3)}"${ok ? ' filter="url(#kg)"' : ""}/>
+        <rect x="${x - cw / 2 + 2}" y="${top + 4}" width="1.4" height="${Math.max(0, bot - top - 8)}" rx=".7" fill="#fff" opacity="${(.45 * mixK).toFixed(3)}"/>`; }
+    h += `</g>`;
+    h += `<text class="${anim ? "fade" : ""}" x="${x}" y="${bot + 26}" text-anchor="middle" style="font-size:13px;font-weight:500;fill:${on ? (ok ? "var(--held)" : "var(--beyond)") : "var(--ink)"}">−${f.f.toFixed(0)}%</text>`;
+    h += `<text x="${x}" y="${H - 34}" text-anchor="middle" style="font-size:13px;font-weight:500;fill:var(--ink)">${f.k}</text><text x="${x}" y="${H - 17}" text-anchor="middle" class="ax">${f.now ? "Today" : f.n.split(" ")[0]}</text></g>`; });
+  if (on) { const ly = y(thr);
+    h += `<g opacity="${mixK.toFixed(3)}"><line x1="${P.l}" x2="${W - P.r + 10}" y1="${ly}" y2="${ly}" style="stroke:var(--ink)" stroke-dasharray="4 4" opacity=".6"/>
+      <rect x="${W - P.r + 12}" y="${ly - 10}" width="${P.r - 18}" height="20" rx="10" style="fill:var(--acc)"/><text x="${W - P.r + 12 + (P.r - 18) / 2}" y="${ly + 4}" text-anchor="middle" style="font-size:10.5px;font-weight:500;fill:var(--card)">−${thr.toFixed(0)}%</text></g>`; }
+  h += `<rect x="0" y="${P.t - 20}" width="${W}" height="${H - P.t + 20}" fill="transparent"/>`;
+  svg.innerHTML = h;
+  svg.setAttribute("aria-label", "Five Nifty 50 falls since 2000 and today's dip, as candles from peak to low" + (on ? `; your line at −${thr.toFixed(0)}%` : ""));
+  G = { W, P, slot, fallsChart: true };
 }
-/* the candles reshape from what is on screen to the chosen ride, and its falls light up */
-function morphL() {
-  const to = CAND(S.crash), from = nowC || CAND(null), fl = nowLit || LIT.map(() => 1), tl = LIT;
-  cancelAnimationFrame(rafL); headL(true);
-  const t0 = performance.now(), dur = RM ? 1 : 900, L = (a, b, e) => a + (b - a) * e;
-  const step = now => { const k = Math.min(1, (now - t0) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-    nowC = to.map((c, i) => ({ ...c, o: L(from[i].o, c.o, e), h: L(from[i].h, c.h, e), l: L(from[i].l, c.l, e), c: L(from[i].c, c.c, e) }));
-    nowLit = tl.map((v, i) => L(fl[i], v, e)); drawL(false); if (k < 1) rafL = requestAnimationFrame(step); };
-  rafL = requestAnimationFrame(step);
-}
-gL.addEventListener("pointermove", e => { if (!HL) return; const r = gL.getBoundingClientRect(), px = e.clientX - r.left;
-  if (px < HL.P.l || px > HL.W - HL.P.r) return leaveL();
-  const i = clamp(Math.floor((px - HL.P.l) / HL.slot), 0, HL.C.length - 1), c = HL.C[i], cx = HL.x(c.t + STEP / 2), b = $("#hLr");
-  b.style.display = ""; b.setAttribute("x", cx - HL.slot / 2); b.setAttribute("width", HL.slot); b.setAttribute("y", HL.P.t - 8); b.setAttribute("height", HL.H - HL.P.b - HL.P.t + 8);
-  const ch = (c.c / c.o - 1) * 100, rb = S.crash != null && S.crash < 100, f = v => rb ? "₹" + (v / HL.C[0].o).toFixed(2) : fmt(v);
-  $("#sL").innerHTML = `<b>${Math.floor(c.t)}</b>&nbsp;&nbsp;O ${f(c.o)}&nbsp; H ${f(c.h)}&nbsp; L ${f(c.l)}&nbsp; C ${f(c.c)}&nbsp;&nbsp;<b style="color:${ch >= 0 ? "#A9803F" : "var(--dn)"}">${ch >= 0 ? "+" : "−"}${Math.abs(ch).toFixed(1)}%</b>`;
-});
-function leaveL() { const b = $("#hLr"); if (b) b.style.display = "none"; headL(false); }
-gL.addEventListener("pointerleave", leaveL);
-
-
-/* ---------------- right: the line since Oct 2023, and two flat years ahead ---------------- */
-const gR = $("#gR"); let HR = null;
-function drawR(anim, part) {
-  const [W, H] = size($("#pR")), sel = S.flat, O = FLATS.find(o => o.v === sel), P = { l: 24, r: 64, t: 96, b: 34 }, T1 = TN + 2, lo = 19500, hi = 28000;
-  gR.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const x = t => P.l + (t - FT0) / (T1 - FT0) * (W - P.l - P.r), y = v => H - P.b - (v - lo) / (hi - lo) * (H - P.t - P.b), xa = x(TN);
-  let h = `<defs><linearGradient id="nl" x1="0" x2="1"><stop offset="0" stop-color="#D9B77A"/><stop offset="1" stop-color="#5E0E2C"/></linearGradient></defs>`;
-  [20000, 22000, 24000, 26000].forEach(v => h += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--grid)"/>${Math.abs(y(v) - y(VN)) > 14 ? `<text x="${W - 22}" y="${y(v) + 3.5}" text-anchor="end" class="ax">${v / 1000}k</text>` : ""}`);
-  [2024, 2025, 2026, 2027, 2028].forEach(yr => { if (x(yr) > P.l + 8 && x(yr) < W - P.r - 8) h += `<text x="${x(yr)}" y="${H - 12}" text-anchor="middle" class="ax">${yr}</text>`; });
-  h += `<line x1="${xa}" x2="${xa}" y1="${P.t - 6}" y2="${H - P.b}" style="stroke:var(--line2)" stroke-dasharray="2 3"/><text x="${xa}" y="${P.t - 12}" text-anchor="middle" class="lab">Today</text>`;
-  h += `<line x1="${x(2024.73)}" x2="${xa}" y1="${y(PK)}" y2="${y(PK)}" style="stroke:var(--faint)" stroke-width=".8" stroke-dasharray="2 3"/><text x="${x(2024.73)}" y="${y(PK) - 8}" class="lab">Sep 2024 high · ${fmt(PK)}</text>`;
-  h += `<path class="${anim && !part ? "draw" : ""}" d="${pathOf(FS, x, y)}" fill="none" style="stroke:var(--dn)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>`;
-  const N = 40, pt = f => { let s = ""; for (let i = 0; i <= N; i++) { const t = i / N * 2; s += (i ? "L" : "M") + (xa + (x(T1) - xa) * i / N).toFixed(1) + " " + y(f(t)).toFixed(1); } return s; };
-  const ad = anim ? "draw" : "";
-  const proj = (d, v) => `<path class="${anim ? "fade" : ""}" d="${d}L${x(T1)} ${H - P.b}L${xa} ${H - P.b}Z" fill="url(#oa)"/><path class="${ad}" d="${d}" fill="none" stroke="url(#ol)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` + gps(x(T1), y(v), O.c[1], anim);
-  if (!O) h += `<path class="${ad}" d="${pt(() => VN)}" fill="none" style="stroke:var(--gold)" stroke-width="1.4" stroke-dasharray="4 4"/>`;
-  else {
-    h += `<defs><linearGradient id="ol" x1="0" x2="1"><stop offset="0" stop-color="#5E0E2C"/><stop offset=".55" stop-color="${O.c[0]}"/><stop offset="1" stop-color="${O.c[1]}"/></linearGradient><linearGradient id="oa" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${O.c[0]}" stop-opacity=".22"/><stop offset="1" stop-color="${O.c[0]}" stop-opacity="0"/></linearGradient></defs>`;
-    h += `<path d="${pt(() => VN)}" fill="none" style="stroke:var(--faint)" stroke-dasharray="3 4"/>`;
-    if (O.v === "infl") h += proj(pt(t => VN * Math.pow(1 + FI, t)), VN * G2);
-    else if (O.v === "stay") h += proj(pt(t => VN / Math.pow(1 + INF, t)), VN / I2);
-    else { let s = ""; for (let q = 0; q <= 48; q++) { const t = q / 48 * 2; s += (q ? "L" : "M") + (xa + (x(T1) - xa) * q / 48).toFixed(1) + " " + y(VN * (1 + .07 * Math.sin(t * Math.PI * 2))).toFixed(1); }
-      h += proj(s, VN); }
+const V = () => +$("#frame").dataset.v;
+function draw(anim) { if (V() === 1) drawPrice(anim); else drawFalls(anim); }
+function headDefault() {
+  if (V() === 2) {
+    const L = LINES.find(l => l.k === sel), c = $("#chip");
+    $("#vcap").textContent = "Nifty 50 · five falls since 2000, and today";
+    if (L) { const n = FALLS.filter(f => f.f <= L.v).length; $("#val").textContent = `−${L.v}%`; c.textContent = "Your line"; c.classList.remove("dn"); $("#vdate").textContent = `${n} of 5 falls stayed within it`; }
+    else { $("#val").textContent = "−60%"; c.textContent = "Deepest · 2008"; c.classList.add("dn"); $("#vdate").textContent = "Each candle runs from a peak down to its low"; }
+    return;
   }
-  h += `<rect x="${W - P.r + 10}" y="${y(VN) - 9}" width="${P.r - 18}" height="18" rx="9" style="fill:var(--dn)"/><text x="${W - P.r + 10 + (P.r - 18) / 2}" y="${y(VN) + 3.5}" text-anchor="middle" style="font-size:10px;font-weight:500;fill:#fff">${(VN / 1000).toFixed(1)}k</text>${O ? "" : gps(xa, y(VN), "#5E0E2C", false)}<g id="hR" style="display:none"><line id="hRl" style="stroke:var(--line2)" stroke-dasharray="2 3"/><circle id="hRc" r="4" style="fill:var(--panel);stroke:var(--maroon)" stroke-width="1.6"/></g><rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>`;
-  gR.innerHTML = h; setLen(gR);
-  gR.setAttribute("aria-label", "Nifty 50 since October 2023, and two flat years ahead");
-  HR = { x, y, W, H, P }; headR(anim);
+  $("#vcap").textContent = "Nifty 50 · since 2000";
+  $("#val").textContent = fmt(VN);
+  const c = $("#chip"); c.textContent = `−${Math.abs(NOW * 100).toFixed(1)}% from its high`; c.classList.add("dn");
+  $("#vdate").textContent = `Today · ${my(TN)}`;
 }
-function headR(anim) {
-  const O = FLATS.find(o => o.v === S.flat);
-  if (!O) { countTo($("#vR"), `−${Math.abs((VN / PK - 1) * 100).toFixed(1)}%`, anim); $("#cR").textContent = "below the September 2024 high"; $("#sR").innerHTML = `<i></i>Nifty 50<i class="ds"></i>If nothing changes`; }
-  else { const v = O.v === "infl" ? G2 : O.v === "stay" ? 1 / I2 : 1; countTo($("#vR"), `₹${v.toFixed(2)} Cr`, anim);
-    $("#cR").textContent = O.v === "stay" ? "₹1 Cr in two years, after inflation" : O.v === "eq" ? "₹1 Cr, more units, waiting for the rebound" : "₹1 Cr in two years";
-    $("#sR").innerHTML = `<i style="background:linear-gradient(90deg,${O.c[0]},${O.c[1]})"></i>${O.n}`; }
-}
-gR.addEventListener("pointermove", e => { if (!HR) return; const r = gR.getBoundingClientRect(), px = e.clientX - r.left;
-  const t = FT0 + (px - HR.P.l) / (HR.x(FT0 + 1) - HR.x(FT0));
-  if (px < HR.P.l || t > TN) return leaveR();
-  const i = at(FS, t), cx = HR.x(FS[i][0]), cy = HR.y(FS[i][1]); $("#hR").style.display = "";
-  $("#hRl").setAttribute("x1", cx); $("#hRl").setAttribute("x2", cx); $("#hRl").setAttribute("y1", HR.P.t - 6); $("#hRl").setAttribute("y2", HR.H - HR.P.b);
-  $("#hRc").setAttribute("cx", cx); $("#hRc").setAttribute("cy", cy);
-  const d = new Date(Math.floor(FS[i][0]), Math.floor((FS[i][0] % 1) * 12), 1);
-  $("#sR").innerHTML = `<b>${d.toLocaleString("en-IN", { month: "short", year: "numeric" })}</b> &nbsp;${fmt(FS[i][1])} &nbsp;<b style="color:var(--dn)">${((FS[i][1] / PK - 1) * 100).toFixed(1)}%</b> from high`;
+svg.addEventListener("pointermove", e => { if (!G) return;
+  if (G.fallsChart) { const r = svg.getBoundingClientRect(), px = e.clientX - r.left, i = Math.floor((px - G.P.l) / G.slot);
+    const best = px >= G.P.l && i >= 0 && i < FC.length ? FC[i] : null, k = best ? best.k : null; if (k === hovF) return; hovF = k; draw(false);
+    if (!best) return headDefault();
+    $("#val").textContent = `−${best.f.toFixed(1)}%`; const c = $("#chip"); c.textContent = best.now ? "Today's dip" : best.n; c.classList.add("dn");
+    $("#vdate").textContent = best.now ? "Below the Sep 2024 high, still recovering" : `${best.k} · ${best.mo} months from peak to recovery`; return; } const r = svg.getBoundingClientRect(), px = e.clientX - r.left;
+  if (px < G.P.l || px > G.W - G.P.r) return leave();
+  const t = T0 + (px - G.P.l) / (G.W - G.P.l - G.P.r) * (TN - T0), i = at(D, t), cx = G.x(D[i][0]);
+  $("#hv").style.display = ""; $("#hvl").setAttribute("x1", cx); $("#hvl").setAttribute("x2", cx);
+  $("#hv1").setAttribute("cx", cx); $("#hv1").setAttribute("cy", G.y(D[i][1])); $("#hv2").setAttribute("cx", cx); $("#hv2").setAttribute("cy", G.dy(DD[i]));
+  $("#val").textContent = fmt(D[i][1]);
+  const c = $("#chip"), p = DD[i] * 100; c.textContent = p < -.5 ? `−${Math.abs(p).toFixed(1)}% from its high` : "At its high"; c.classList.toggle("dn", p < -.5);
+  $("#vdate").textContent = my(D[i][0]);
 });
-function leaveR() { const g = $("#hR"); if (g) g.style.display = "none"; headR(false); }
-gR.addEventListener("pointerleave", leaveR);
+function leave() { const g = $("#hv"); if (g) g.style.display = "none"; if (hovF) { hovF = null; draw(false); } headDefault(); }
+svg.addEventListener("pointerleave", leave);
 
-/* light by default; the switch remembers the viewer's choice */
-const themeBtns = document.querySelectorAll(".theme button");
-const setTheme = t => { document.documentElement.dataset.theme = t; themeBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.t === t)); try { localStorage.setItem("wiq-theme", t); } catch (e) {} };
-themeBtns.forEach(b => b.addEventListener("click", () => setTheme(b.dataset.t)));
-themeBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.t === document.documentElement.dataset.theme));
+/* ---------------- theme, why, continue ---------------- */
+const tb = document.querySelectorAll(".theme button");
+const mark = () => tb.forEach(b => b.classList.toggle("on", b.dataset.t === document.documentElement.dataset.theme));
+tb.forEach(b => b.addEventListener("click", () => { document.documentElement.dataset.theme = b.dataset.t; try { localStorage.setItem("wiq-theme", b.dataset.t); } catch (e) {} mark(); }));
+mark();
+$(".why-b").addEventListener("click", () => { const w = $("#why"), o = !w.classList.contains("open"); w.classList.toggle("open", o); $(".why-b").setAttribute("aria-expanded", o); });
+
+/* V1 / V2 */
+const vb = document.querySelectorAll(".vsw button");
+const setV = (v, anim) => { $("#frame").dataset.v = v; vb.forEach(b => { b.classList.toggle("on", b.dataset.v === String(v)); b.setAttribute("aria-selected", b.dataset.v === String(v)); });
+  try { const u = new URL(location.href); u.searchParams.set("v", v); history.replaceState(null, "", u); } catch (e) {}
+  hovF = null; headDefault(); requestAnimationFrame(() => { const r = vis.getBoundingClientRect(); last = Math.round(r.width) + "x" + Math.round(r.height); draw(anim); }); };
+vb.forEach(b => b.addEventListener("click", () => setV(+b.dataset.v, true)));
 
 /* ---------------- start ---------------- */
-function drawAll(anim) {
-  nowC = CAND(S.crash); nowLit = S.crash != null ? LIT.slice() : null;
-  drawL(anim); headL(anim); drawR(anim, false);
-}
-mark();
-let rz, last = "";
-new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { const k = size($("#pL")).join() + size($("#pR")).join(); if (k !== last) { last = k; drawAll(false); } }, 80); }).observe($(".split"));
-(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { last = size($("#pL")).join() + size($("#pR")).join(); drawAll(true); });
+if (sel) { thr = LINES.find(l => l.k === sel).v; mixK = 1; }
+readings(false);
+let rz, last = ""; setV(new URLSearchParams(location.search).get("v") === "2" ? 2 : 1, false);
+new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { const r = vis.getBoundingClientRect(), k = Math.round(r.width) + "x" + Math.round(r.height); if (k !== last) { last = k; draw(false); } }, 80); }).observe(vis);
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setV(V(), true));
 </script>
 </body>
 </html>
