@@ -234,7 +234,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .tip div i{width:3px;height:11px;border-radius:2px;background:#E6C68A}
 .tip div i.r{background:#F0716A}
 .tip div b{margin-left:auto;padding-left:14px;font-weight:500;color:#fff}
-.frame[data-v="2"] .tip{display:none}
+.tip{display:none!important}
 
 /* V2 · falls chart */
 .fname{font-size:11px;font-weight:500;paint-order:stroke;stroke:var(--card);stroke-width:4px;stroke-linejoin:round}
@@ -463,11 +463,13 @@ function drawPrice(anim) {
   const lx = x(D[iLow][0]), ly = y(shown(iLow)), depth = FREAL * scaleNow(), mc = on ? "var(--beyond)" : "var(--line)";
   h += `<g class="gps${anim ? " pop" : ""}"><circle class="rp" cx="${lx}" cy="${ly}" r="6" style="fill:${mc}"/><circle class="rp rp2" cx="${lx}" cy="${ly}" r="6" style="fill:${mc}"/><circle cx="${lx}" cy="${ly}" r="7.5" style="fill:var(--card);stroke:${mc}" stroke-width="2.4"/><circle cx="${lx}" cy="${ly}" r="2.8" style="fill:${mc}"/></g>`;
   h += `<g><rect x="${lx - 30}" y="${ly + 18}" width="60" height="22" rx="11" style="fill:var(--card);stroke:var(--hair)"/><circle cx="${lx - 18}" cy="${ly + 29}" r="3" style="fill:${mc}"/><text x="${lx + 6}" y="${ly + 33}" text-anchor="middle" style="font-size:11px;font-weight:500;fill:var(--ink)">−${depth.toFixed(0)}%</text></g>`;
-  if (on) { const L = LINES.find(l => l.k === sel), cw = 170, ch = 58, cx = clamp(lx - cw - 34, P.l, W - P.r - cw), cy = clamp(yP - ch - 30, P.t - 4, H - P.b - ch);
+  if (on) { const L = LINES.find(l => l.k === sel), cw = 176, ch = 80, cx = clamp(lx - cw - 34, P.l, W - P.r - cw), cy = clamp(yP - ch - 30, P.t - 4, H - P.b - ch);
     h += `<g opacity="${mixK.toFixed(3)}"><path d="M${cx + cw} ${cy + ch / 2}H${lx}V${ly - 10}" fill="none" style="stroke:var(--beyond)" stroke-dasharray="2 3" opacity=".6"/><rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" rx="12" fill="#1F1916"/>
       <text x="${cx + 14}" y="${cy + 19}" style="font-size:10.5px;fill:rgba(245,238,227,.55)">${L ? L.n : ""} · at the low</text>
-      <rect x="${cx + 14}" y="${cy + 30}" width="3" height="12" rx="1.5" fill="#F0716A"/><text x="${cx + 24}" y="${cy + 40}" style="font-size:12px;fill:rgba(245,238,227,.85)">₹10 Cr</text>
-      <text x="${cx + cw - 14}" y="${cy + 40}" text-anchor="end" style="font-size:12px;font-weight:500;fill:#fff">₹${(10 * (1 - depth / 100)).toFixed(1)} Cr</text></g>`; }
+      <rect x="${cx + 14}" y="${cy + 30}" width="3" height="12" rx="1.5" fill="#E6C68A"/><text x="${cx + 24}" y="${cy + 40}" style="font-size:12px;fill:rgba(245,238,227,.85)">Nifty 50</text>
+      <text x="${cx + cw - 14}" y="${cy + 40}" text-anchor="end" style="font-size:12px;font-weight:500;fill:#fff">${fmt(shown(iLow))}</text>
+      <rect x="${cx + 14}" y="${cy + 52}" width="3" height="12" rx="1.5" fill="#F0716A"/><text x="${cx + 24}" y="${cy + 62}" style="font-size:12px;fill:rgba(245,238,227,.85)">₹10 Cr</text>
+      <text x="${cx + cw - 14}" y="${cy + 62}" text-anchor="end" style="font-size:12px;font-weight:500;fill:#fff">₹${(10 * (1 - depth / 100)).toFixed(1)} Cr</text></g>`; }
   h += `<g id="hv" style="display:none"><line id="hvl" y1="${P.t - 6}" y2="${H - P.b}" style="stroke:var(--ink)" stroke-width="1" opacity=".2"/><circle id="hv1" r="6" style="fill:var(--card);stroke:var(--ink)" stroke-width="2"/></g><rect x="0" y="${P.t - 20}" width="${W}" height="${H - P.t + 20}" fill="transparent"/>`;
   svg.innerHTML = h;
   svg.querySelectorAll(".draw").forEach(p => p.style.setProperty("--len", Math.ceil(p.getTotalLength())));
