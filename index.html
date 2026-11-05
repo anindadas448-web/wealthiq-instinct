@@ -282,6 +282,29 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   .act{justify-content:space-between}
   .cta{flex:1 1 0%;min-width:0}
 }
+/* V1 · split 50 / 50: the graph and its two readings on the left, the question and answers on the right */
+.frame[data-v="1"] .cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;column-gap:28px;row-gap:0}
+.frame[data-v="1"] .rcol{display:contents}
+.frame[data-v="1"] .vis{grid-column:1;grid-row:1 / 4;height:auto;min-height:430px}
+.frame[data-v="1"] .q-t{grid-column:2;grid-row:1;padding:10px 4px 0}
+.frame[data-v="1"] .q-s{grid-column:2;grid-row:2;padding:0 4px}
+.frame[data-v="1"] .seg{grid-column:2;grid-row:3 / 5;align-self:start;margin:28px 4px 0;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.frame[data-v="1"] .seg button{height:84px;border-radius:18px}
+.frame[data-v="1"] .seg button b{font-size:16px}
+.frame[data-v="1"] .seg button small{font-size:12.5px}
+.frame[data-v="1"] .reads{grid-column:1;grid-row:4;margin-top:14px;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;gap:12px;align-self:start}
+.frame[data-v="1"] .reads .card{display:block;padding:18px 22px}
+.frame[data-v="1"] .reads .card .big{margin-top:10px;font-size:34px}
+@media (max-width:900px){
+  .frame[data-v="1"] .cols{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+  .frame[data-v="1"] .vis,.frame[data-v="1"] .q-t,.frame[data-v="1"] .q-s,.frame[data-v="1"] .seg,.frame[data-v="1"] .reads{grid-column:1;grid-row:auto}
+  .frame[data-v="1"] .vis{order:1;height:min(110vw,460px);min-height:0}
+  .frame[data-v="1"] .reads{order:2}
+  .frame[data-v="1"] .q-t{order:3;margin-top:22px}
+  .frame[data-v="1"] .q-s{order:4}
+  .frame[data-v="1"] .seg{order:5;margin-top:18px}
+  .frame[data-v="1"] .reads .card .big{font-size:28px}
+}
 </style>
 </head>
 <body>
@@ -306,7 +329,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     <div class="head">
       <span class="eye"><b>I</b>Instinct</span>
       <span class="sub">How you respond when markets turn.</span>
-      <div class="vsw" role="tablist" aria-label="Layout"><button type="button" role="tab" data-v="1">V1<small>Stacked</small></button><button type="button" role="tab" data-v="2">V2<small>Split</small></button></div>
+      <div class="vsw" role="tablist" aria-label="Layout"><button type="button" role="tab" data-v="1">V1<small>Line</small></button><button type="button" role="tab" data-v="2">V2<small>Candles</small></button></div>
       <span class="count num">04<i>/</i>06</span>
     </div>
 
@@ -430,9 +453,11 @@ const scaleNow = () => thr == null ? 1 : 1 + (thr / FREAL - 1) * mixK;
 /* inside the fall the depth below the peak is scaled; at the peak and at recovery it is zero, so the line joins without a kink */
 /* after the low the whole line carries the deeper (or shallower) fall, easing back to today's real close */
 const TLOW = D[iLow][0], RLOW = D[iLow][1] / FPK - 1, sstep = u => u * u * (3 - 2 * u);
-const shown = i => { if (i < iA) return D[i][1]; const s = scaleNow();
-  if (i <= iLow) return FPK * (1 + Math.min(0, D[i][1] / FPK - 1) * s);
-  const kLow = (1 + RLOW * s) / (1 + RLOW), u = clamp((D[i][0] - TLOW) / (TN - TLOW), 0, 1);
+const kPk = () => 1 + .14 * (scaleNow() - 1);
+const shown = i => { const s = scaleNow(), kp = kPk();
+  if (i < iA) { const u = clamp((D[i][0] - V1T) / (FTP - V1T), 0, 1); return D[i][1] * (1 + (kp - 1) * sstep(u)); }
+  if (i <= iLow) return FPK * kp * (1 + Math.min(0, D[i][1] / FPK - 1) * s);
+  const kLow = kp * (1 + RLOW * s) / (1 + RLOW), u = clamp((D[i][0] - TLOW) / (TN - TLOW), 0, 1);
   return D[i][1] * (1 + (kLow - 1) * (1 - sstep(u))); };
 function drawPrice(anim) {
   const r = vis.getBoundingClientRect(), W = Math.max(300, r.width), H = Math.max(300, r.height);
@@ -440,13 +465,13 @@ function drawPrice(anim) {
   const i0 = at(D, V1T), on = thr != null, P = { l: 64, r: 28, t: 112, b: 34 }, s0 = D[i0][0];
   const vals = D.slice(i0).map(p => p[1]), lo = Math.min(Math.min(...vals), FPK * .5) * .85, hi = Math.max(...vals) * 1.05;
   const x = t => P.l + (t - s0) / (TN - s0) * (W - P.l - P.r), y = v => H - P.b - (v - lo) / (hi - lo) * (H - P.t - P.b);
-  const xa = x(FTP), xb = x(FTR), yP = y(FPK), span = W - P.l - P.r, o = v => clamp((v - P.l) / span, 0, 1).toFixed(4);
+  const xa = x(FTP), xb = x(FTR), yP = y(FPK * kPk()), span = W - P.l - P.r, o = v => clamp((v - P.l) / span, 0, 1).toFixed(4);
   let h = `<defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--area)" stop-opacity=".16"/><stop offset="1" style="stop-color:var(--area)" stop-opacity="0"/></linearGradient>
     <linearGradient id="gr" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--beyond)" stop-opacity=".05"/><stop offset="1" style="stop-color:var(--beyond)" stop-opacity=".4"/></linearGradient>
     <linearGradient id="gl" gradientUnits="userSpaceOnUse" x1="${P.l}" x2="${W - P.r}" y1="0" y2="0">
-      <stop offset="0" style="stop-color:var(--beyond)" stop-opacity="0"/><stop offset="${o(xa - 70)}" style="stop-color:var(--beyond)" stop-opacity="0"/>
-      <stop offset="${o(xa + 14)}" style="stop-color:var(--beyond)" stop-opacity="1"/><stop offset="${o(xb - 14)}" style="stop-color:var(--beyond)" stop-opacity="1"/>
-      <stop offset="${o(xb + 70)}" style="stop-color:var(--beyond)" stop-opacity="0"/><stop offset="1" style="stop-color:var(--beyond)" stop-opacity="0"/></linearGradient>
+      <stop offset="0" style="stop-color:var(--beyond)" stop-opacity="0"/><stop offset="${o(xa - 28)}" style="stop-color:var(--beyond)" stop-opacity="0"/>
+      <stop offset="${o(xa + 6)}" style="stop-color:var(--beyond)" stop-opacity="1"/><stop offset="${o(xb - 6)}" style="stop-color:var(--beyond)" stop-opacity="1"/>
+      <stop offset="${o(xb + 28)}" style="stop-color:var(--beyond)" stop-opacity="0"/><stop offset="1" style="stop-color:var(--beyond)" stop-opacity="0"/></linearGradient>
     <clipPath id="below"><rect x="${xa}" y="${yP}" width="${xb - xa}" height="${H}"/></clipPath></defs>`;
   const st = niceStep((hi - lo) / 4);
   for (let v = Math.ceil(lo / st) * st; v < hi; v += st) h += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--grid)"/><text x="${P.l - 12}" y="${y(v) + 3.5}" text-anchor="end" class="ax">${fmt(v)}</text>`;
@@ -549,9 +574,9 @@ svg.addEventListener("pointermove", e => { if (!G) return;
     $("#val").textContent = `−${best.f.toFixed(1)}%`; const c = $("#chip"); c.textContent = best.now ? "Today's dip" : best.n; c.classList.add("dn");
     $("#vdate").textContent = best.now ? "Since January’s high, still recovering" : `${best.k} · ${best.mo} months from peak to recovery`; return; } const r = svg.getBoundingClientRect(), px = e.clientX - r.left;
   if (px < G.P.l || px > G.W - G.P.r) return leave();
-  const t = G.s0 + (px - G.P.l) / (G.W - G.P.l - G.P.r) * (TN - G.s0), i = at(D, t), v = shown(i), cx = G.x(D[i][0]), cy = G.y(v), bent = thr != null && i >= iA;
+  const t = G.s0 + (px - G.P.l) / (G.W - G.P.l - G.P.r) * (TN - G.s0), i = at(D, t), v = shown(i), cx = G.x(D[i][0]), cy = G.y(v), bent = thr != null;
   $("#hv").style.display = ""; $("#hvl").setAttribute("x1", cx); $("#hvl").setAttribute("x2", cx); $("#hv1").setAttribute("cx", cx); $("#hv1").setAttribute("cy", cy);
-  const p = bent ? (v / FPK - 1) * 100 : DD[i] * 100;
+  const p = bent ? (v / (FPK * kPk()) - 1) * 100 : DD[i] * 100;
   tip.innerHTML = `<small>${my(D[i][0])}${bent ? " · at your line" : ""}</small><div><i></i>Nifty 50<b class="num">${fmt(v)}</b></div><div><i class="r"></i>From its high<b class="num">${p < -.5 ? "−" + Math.abs(p).toFixed(1) + "%" : "At high"}</b></div>`;
   const tw = tip.offsetWidth, th = tip.offsetHeight, left = cx + 16 + tw > G.W - 8 ? cx - 16 - tw : cx + 16;
   tip.style.transform = `translate(${left}px,${clamp(cy - th - 12, G.P.t - 10, G.H - th - 40)}px)`; tip.classList.add("on");
