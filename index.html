@@ -329,7 +329,6 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     <div class="head">
       <span class="eye"><b>I</b>Instinct</span>
       <span class="sub">How you respond when markets turn.</span>
-      <div class="vsw" role="tablist" aria-label="Layout"><button type="button" role="tab" data-v="1">V1<small>Line</small></button><button type="button" role="tab" data-v="2">V2<small>Candles</small></button></div>
       <span class="count num">04<i>/</i>06</span>
     </div>
 
@@ -453,17 +452,19 @@ const scaleNow = () => thr == null ? 1 : 1 + (thr / FREAL - 1) * mixK;
 /* inside the fall the depth below the peak is scaled; at the peak and at recovery it is zero, so the line joins without a kink */
 /* after the low the whole line carries the deeper (or shallower) fall, easing back to today's real close */
 const TLOW = D[iLow][0], RLOW = D[iLow][1] / FPK - 1, sstep = u => u * u * (3 - 2 * u);
-const kPk = () => 1 + .14 * (scaleNow() - 1);
-const shown = i => { const s = scaleNow(), kp = kPk();
-  if (i < iA) { const u = clamp((D[i][0] - V1T) / (FTP - V1T), 0, 1); return D[i][1] * (1 + (kp - 1) * sstep(u)); }
-  if (i <= iLow) return FPK * kp * (1 + Math.min(0, D[i][1] / FPK - 1) * s);
-  const kLow = kp * (1 + RLOW * s) / (1 + RLOW), u = clamp((D[i][0] - TLOW) / (TN - TLOW), 0, 1);
-  return D[i][1] * (1 + (kLow - 1) * (1 - sstep(u))); };
+/* each week = its running high × (1 − how far below it); the depth scales with your line, the high leans with it */
+const I0 = at(D, V1T), ENV = [], DDR = [];
+{ let hi = 0; for (let i = I0; i < D.length; i++) { hi = Math.max(hi, D[i][1]); ENV[i] = hi; DDR[i] = D[i][1] / hi - 1; } }
+const atS = (i, s) => ENV[i] * Math.pow(ENV[i] / ENV[I0], .24 * (s - 1)) * (1 + DDR[i] * s);
+const shown = i => i < I0 ? D[i][1] : atS(i, scaleNow());
+const kPk = () => shown(iA) / FPK;
+/* a fixed value axis, wide enough for every answer, so the line moves and the axis does not */
+const VR = (() => { let lo = 1e9, hi = 0; [10, FREAL, 45].forEach(d => { const s = d / FREAL; for (let i = I0; i < D.length; i++) { const v = atS(i, s); lo = Math.min(lo, v); hi = Math.max(hi, v); } }); return [lo * .9, hi * 1.05]; })();
 function drawPrice(anim) {
   const r = vis.getBoundingClientRect(), W = Math.max(300, r.width), H = Math.max(300, r.height);
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   const i0 = at(D, V1T), on = thr != null, P = { l: 64, r: 28, t: 112, b: 34 }, s0 = D[i0][0];
-  const vals = D.slice(i0).map(p => p[1]), lo = Math.min(Math.min(...vals), FPK * .5) * .85, hi = Math.max(...vals) * 1.05;
+  const [lo, hi] = VR;
   const x = t => P.l + (t - s0) / (TN - s0) * (W - P.l - P.r), y = v => H - P.b - (v - lo) / (hi - lo) * (H - P.t - P.b);
   const xa = x(FTP), xb = x(FTR), yP = y(FPK * kPk()), span = W - P.l - P.r, o = v => clamp((v - P.l) / span, 0, 1).toFixed(4);
   let h = `<defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--area)" stop-opacity=".16"/><stop offset="1" style="stop-color:var(--area)" stop-opacity="0"/></linearGradient>
@@ -483,7 +484,10 @@ function drawPrice(anim) {
   if (on) h += `<g opacity="${mixK.toFixed(3)}"><line x1="${xa - 24}" x2="${xb + 24}" y1="${yP}" y2="${yP}" style="stroke:var(--ink)" stroke-dasharray="3 4" opacity=".4"/></g>`;
   /* one line in maroon; the fall blends into red and back */
   h += `<path class="${anim ? "draw" : ""}" d="${line}" fill="none" style="stroke:var(--line)" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>`;
-  h += `<path d="${line}" fill="none" stroke="url(#gl)" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round" opacity="${on ? mixK.toFixed(3) : 0}"/>`;
+  if (on) { const s = scaleNow(); let seg = "", segs = [];
+    for (let i = i0; i < D.length; i++) { const deep = DDR[i] * s < -.04; if (deep) seg += (seg ? "L" : "M") + x(D[i][0]).toFixed(1) + " " + y(shown(i)).toFixed(1); else if (seg) { segs.push(seg); seg = ""; } }
+    if (seg) segs.push(seg);
+    h += `<g opacity="${mixK.toFixed(3)}">` + segs.map(sg => `<path d="${sg}" fill="none" style="stroke:var(--beyond)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`).join("") + `</g>`; }
   /* the low, tracked */
   const lx = x(D[iLow][0]), ly = y(shown(iLow)), depth = FREAL * scaleNow(), mc = on ? "var(--beyond)" : "var(--line)";
   h += `<g class="gps${anim ? " pop" : ""}"><circle class="rp" cx="${lx}" cy="${ly}" r="6" style="fill:${mc}"/><circle class="rp rp2" cx="${lx}" cy="${ly}" r="6" style="fill:${mc}"/><circle cx="${lx}" cy="${ly}" r="7.5" style="fill:var(--card);stroke:${mc}" stroke-width="2.4"/><circle cx="${lx}" cy="${ly}" r="2.8" style="fill:${mc}"/></g>`;
@@ -565,7 +569,7 @@ function headDefault() {
   const L = LINES.find(l => l.k === sel);
   $("#vcap").textContent = "Nifty 50 · 2010 – today";
   $("#val").textContent = L ? `−${L.v}%` : fmt(VN);
-  $("#vdate").textContent = L ? `${L.n} · the 2020 fall, taken to your line` : `As of ${my(TN)}`;
+  $("#vdate").textContent = L ? `${L.n} · every fall since 2010, taken to your line` : `As of ${my(TN)}`;
 }
 svg.addEventListener("pointermove", e => { if (!G) return;
   if (G.fallsChart) { const r = svg.getBoundingClientRect(), px = e.clientX - r.left;
@@ -605,9 +609,9 @@ vb.forEach(b => b.addEventListener("click", () => setV(+b.dataset.v, true)));
 /* ---------------- start ---------------- */
 if (sel) { thr = LINES.find(l => l.k === sel).v; mixK = 1; }
 readings(false);
-let rz, last = ""; setV(new URLSearchParams(location.search).get("v") === "2" ? 2 : 1, false);
+let rz, last = ""; setV(1, false);
 new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { const r = vis.getBoundingClientRect(), k = Math.round(r.width) + "x" + Math.round(r.height); if (k !== last) { last = k; draw(false); } }, 80); }).observe(vis);
-(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setV(V(), true));
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setV(1, true));
 </script>
 </body>
 </html>

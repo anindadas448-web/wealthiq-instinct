@@ -1,10 +1,9 @@
 # WealthIQ · Instinct page
 
-One question: how deep a fall could you sit through? Steady, Measured, Bold or Fearless, against the Nifty 50 since 2000.
+One question: how deep a fall could you sit through? Steady, Measured, Bold or Fearless.
 
-- V1 Line: a 50/50 split, the Nifty 50 since 2010 with two readings below it on the left, the question on the right; each answer reshapes the whole line.
-- V2 Candles: each fall as a group of quarterly candles with the four bands behind them.
+Left: the Nifty 50 since 2010 with two readings below it. Right: the question and answers. Each answer reshapes the whole line: every fall since 2010 is taken to that depth, falls in red, with a GPS marker at the 2020 low.
 
-Live: https://anindadas448-web.github.io/wealthiq-instinct/ (add ?v=2 for the split version)
+Live: https://wealthiq-instinct.vercel.app
 
 The earlier two-question page is at v3.html.
