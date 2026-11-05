@@ -484,10 +484,7 @@ function drawPrice(anim) {
   if (on) h += `<g opacity="${mixK.toFixed(3)}"><line x1="${xa - 24}" x2="${xb + 24}" y1="${yP}" y2="${yP}" style="stroke:var(--ink)" stroke-dasharray="3 4" opacity=".4"/></g>`;
   /* one line in maroon; the fall blends into red and back */
   h += `<path class="${anim ? "draw" : ""}" d="${line}" fill="none" style="stroke:var(--line)" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>`;
-  if (on) { const s = scaleNow(); let seg = "", segs = [];
-    for (let i = i0; i < D.length; i++) { const deep = DDR[i] * s < -.04; if (deep) seg += (seg ? "L" : "M") + x(D[i][0]).toFixed(1) + " " + y(shown(i)).toFixed(1); else if (seg) { segs.push(seg); seg = ""; } }
-    if (seg) segs.push(seg);
-    h += `<g opacity="${mixK.toFixed(3)}">` + segs.map(sg => `<path d="${sg}" fill="none" style="stroke:var(--beyond)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`).join("") + `</g>`; }
+  h += `<path d="${line}" fill="none" stroke="url(#gl)" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round" opacity="${on ? mixK.toFixed(3) : 0}"/>`;
   /* the low, tracked */
   const lx = x(D[iLow][0]), ly = y(shown(iLow)), depth = FREAL * scaleNow(), mc = on ? "var(--beyond)" : "var(--line)";
   h += `<g class="gps${anim ? " pop" : ""}"><circle class="rp" cx="${lx}" cy="${ly}" r="6" style="fill:${mc}"/><circle class="rp rp2" cx="${lx}" cy="${ly}" r="6" style="fill:${mc}"/><circle cx="${lx}" cy="${ly}" r="7.5" style="fill:var(--card);stroke:${mc}" stroke-width="2.4"/><circle cx="${lx}" cy="${ly}" r="2.8" style="fill:${mc}"/></g>`;
